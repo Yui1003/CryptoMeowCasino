@@ -20,11 +20,13 @@ export default function Wallet() {
   const { data: gameHistory = [] } = useQuery<GameHistory[]>({
     queryKey: ["/api/games/history"],
     refetchOnWindowFocus: true,
+    refetchInterval: 10000, // Refetch every 10 seconds
   });
 
   const { data: withdrawalHistory = [] } = useQuery<Withdrawal[]>({
     queryKey: ["/api/withdrawals/user"],
     refetchOnWindowFocus: true,
+    refetchInterval: 10000, // Refetch every 10 seconds
   });
 
   const totalWinnings = gameHistory.reduce((sum, game) => sum + parseFloat(game.winAmount), 0);

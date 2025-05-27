@@ -31,7 +31,7 @@ export default function Admin() {
     return null;
   }
 
-  const { data: users = [] } = useQuery<User[]>({
+  const { data: users = [], isLoading: usersLoading } = useQuery<User[]>({
     queryKey: ["/api/admin/users"],
   });
 
@@ -52,6 +52,7 @@ export default function Admin() {
 
   // Helper function to get username by user ID
   const getUsernameById = (userId: number) => {
+    if (usersLoading) return "Loading...";
     const user = users.find(u => u.id === userId);
     return user?.username || `User ${userId}`;
   };

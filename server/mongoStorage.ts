@@ -172,16 +172,28 @@ export class MongoStorage implements IStorage {
   async updateDepositStatus(id: number, status: string): Promise<void> {
     if (!this.isConnected) return;
     try {
-      const deposit = await Deposit.findOneAndUpdate(
-        { _id: new mongoose.Types.ObjectId(id.toString().padStart(24, '0')) },
-        { status }
-      );
+      // Find deposit by converted ID
+      const deposits = await Deposit.find();
+      const deposit = deposits.find(d => {
+        const convertedId = parseInt(d._id.toString().slice(-6), 16);
+        return convertedId === id;
+      });
 
-      if (status === "approved" && deposit) {
+      if (!deposit) {
+        console.error('Deposit not found with ID:', id);
+        return;
+      }
+
+      // Update the deposit status
+      await Deposit.findOneAndUpdate({ _id: deposit._id }, { status });
+
+      if (status === "approved") {
         const user = await User.findById(deposit.userId);
         if (user) {
           const newBalance = (parseFloat(user.balance) + parseFloat(deposit.amount)).toFixed(2);
-          await this.updateUserBalance(parseInt(deposit.userId.toString()), newBalance);
+          // Convert back to our ID format
+          const convertedUserId = parseInt(user._id.toString().slice(-6), 16);
+          await this.updateUserBalance(convertedUserId, newBalance);
         }
       }
     } catch (error) {
@@ -222,7 +234,13 @@ export class MongoStorage implements IStorage {
   async getWithdrawal(id: number): Promise<any> {
     if (!this.isConnected) return undefined;
     try {
-      const withdrawal = await Withdrawal.findOne({ _id: new mongoose.Types.ObjectId(id.toString().padStart(24, '0')) });
+      // Find withdrawal by converted ID
+      const withdrawals = await Withdrawal.find();
+      const withdrawal = withdrawals.find(w => {
+        const convertedId = parseInt(w._id.toString().slice(-6), 16);
+        return convertedId === id;
+      });
+      
       return withdrawal ? this.convertMongoWithdrawal(withdrawal) : undefined;
     } catch (error) {
       console.error('Error getting withdrawal:', error);
@@ -244,8 +262,19 @@ export class MongoStorage implements IStorage {
   async getUserWithdrawals(userId: number): Promise<any[]> {
     if (!this.isConnected) return [];
     try {
+      // Find user by converted ID to get real ObjectId
+      const users = await User.find();
+      const user = users.find(u => {
+        const convertedId = parseInt(u._id.toString().slice(-6), 16);
+        return convertedId === userId;
+      });
+      
+      if (!user) {
+        return []; // User not found
+      }
+      
       const withdrawals = await Withdrawal.find({
-        userId: new mongoose.Types.ObjectId(userId.toString().padStart(24, '0'))
+        userId: user._id
       }).sort({ createdAt: -1 });
       return withdrawals.map(w => this.convertMongoWithdrawal(w));
     } catch (error) {
@@ -257,10 +286,20 @@ export class MongoStorage implements IStorage {
   async updateWithdrawalStatus(id: number, status: string): Promise<void> {
     if (!this.isConnected) return;
     try {
-      await Withdrawal.findOneAndUpdate(
-        { _id: new mongoose.Types.ObjectId(id.toString().padStart(24, '0')) },
-        { status }
-      );
+      // Find withdrawal by converted ID
+      const withdrawals = await Withdrawal.find();
+      const withdrawal = withdrawals.find(w => {
+        const convertedId = parseInt(w._id.toString().slice(-6), 16);
+        return convertedId === id;
+      });
+
+      if (!withdrawal) {
+        console.error('Withdrawal not found with ID:', id);
+        return;
+      }
+
+      // Update the withdrawal status
+      await Withdrawal.findOneAndUpdate({ _id: withdrawal._id }, { status });
     } catch (error) {
       console.error('Error updating withdrawal status:', error);
     }
@@ -315,9 +354,21 @@ export class MongoStorage implements IStorage {
   async getGameHistory(userId?: number): Promise<any[]> {
     if (!this.isConnected) return [];
     try {
-      const query = userId ? 
-        { userId: new mongoose.Types.ObjectId(userId.toString().padStart(24, '0')) } : 
-        {};
+      let query = {};
+      if (userId) {
+        // Find user by converted ID to get real ObjectId
+        const users = await User.find();
+        const user = users.find(u => {
+          const convertedId = parseInt(u._id.toString().slice(-6), 16);
+          return convertedId === userId;
+        });
+        
+        if (user) {
+          query = { userId: user._id };
+        } else {
+          return []; // User not found
+        }
+      }
       const history = await GameHistory.find(query).sort({ createdAt: -1 });
       return history.map(h => this.convertMongoGameHistory(h));
     } catch (error) {
@@ -531,7 +582,7 @@ export class MongoStorage implements IStorage {
   private convertMongoDeposit(deposit: any): any {
     return {
       id: parseInt(deposit._id.toString().slice(-6), 16),
-      userId: parseInt(deposit.userId.toString()),
+      userId: parseInt(deposit.userId.toString().slice(-6), 16),
       amount: deposit.amount,
       status: deposit.status,
       receiptUrl: deposit.receiptUrl,
@@ -542,7 +593,7 @@ export class MongoStorage implements IStorage {
   private convertMongoWithdrawal(withdrawal: any): any {
     return {
       id: parseInt(withdrawal._id.toString().slice(-6), 16),
-      userId: parseInt(withdrawal.userId.toString()),
+      userId: parseInt(withdrawal.userId.toString().slice(-6), 16),
       amount: withdrawal.amount,
       platform: withdrawal.platform,
       accountInfo: withdrawal.accountInfo,
@@ -554,7 +605,7 @@ export class MongoStorage implements IStorage {
   private convertMongoGameHistory(game: any): any {
     return {
       id: parseInt(game._id.toString().slice(-6), 16),
-      userId: parseInt(game.userId.toString()),
+      userId: parseInt(game.userId.toString().slice(-6), 16),
       gameType: game.gameType,
       betAmount: game.betAmount,
       winAmount: game.winAmount,
