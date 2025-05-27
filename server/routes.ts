@@ -96,7 +96,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const user = await storage.createUser(userData);
-      req.session.userId = user.id;
+      req.session.userId = Number(user.id);
 
       const { password, ...userWithoutPassword } = user;
       res.json({ user: userWithoutPassword });
@@ -124,7 +124,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
-      req.session.userId = user.id;
+      req.session.userId = Number(user.id);
 
       const { password: _, ...userWithoutPassword } = user;
       res.json({ user: userWithoutPassword });

@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { User } from './mongodb-schemas'; // Use the correct path to mongodb-schemas.ts
+import { User } from './mongodb-schemas.ts'; // Use the correct path to mongodb-schemas.ts
 import bcrypt from 'bcrypt';
 
 async function addAdminUser() {

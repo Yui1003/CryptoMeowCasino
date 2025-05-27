@@ -1,4 +1,3 @@
-
 import { IStorage } from "./storage";
 import { connectToMongoDB } from "../mongodb-connection";
 import { User, Deposit, Withdrawal, GameHistory, Jackpot, FarmCat } from "../mongodb-schemas";
@@ -58,7 +57,16 @@ export class MongoStorage implements IStorage {
   async getUser(id: number): Promise<any> {
     if (!this.isConnected) return undefined;
     try {
-      const user = await User.findOne({ _id: new mongoose.Types.ObjectId(id.toString().padStart(24, '0')) });
+      console.log("Looking up user with ID:", id, "type:", typeof id);
+      
+      // First try to find by the converted ID format (last 6 chars of ObjectId as hex)
+      const users = await User.find();
+      const user = users.find(u => {
+        const convertedId = parseInt(u._id.toString().slice(-6), 16);
+        return convertedId === id;
+      });
+      
+      console.log("MongoDB query result:", user ? `Found user: ${user.username}` : "No user found");
       return user ? this.convertMongoUser(user) : undefined;
     } catch (error) {
       console.error('Error getting user:', error);
@@ -105,10 +113,17 @@ export class MongoStorage implements IStorage {
       if (meowBalance !== undefined) {
         updateData.meowBalance = meowBalance;
       }
-      await User.findOneAndUpdate(
-        { _id: new mongoose.Types.ObjectId(userId.toString().padStart(24, '0')) },
-        updateData
-      );
+      
+      // Find user by converted ID
+      const users = await User.find();
+      const user = users.find(u => {
+        const convertedId = parseInt(u._id.toString().slice(-6), 16);
+        return convertedId === userId;
+      });
+      
+      if (user) {
+        await User.findOneAndUpdate({ _id: user._id }, updateData);
+      }
     } catch (error) {
       console.error('Error updating user balance:', error);
     }
@@ -117,8 +132,19 @@ export class MongoStorage implements IStorage {
   async createDeposit(deposit: any): Promise<any> {
     if (!this.isConnected) throw new Error('MongoDB not connected');
     try {
+      // Find user by converted ID to get real ObjectId
+      const users = await User.find();
+      const user = users.find(u => {
+        const convertedId = parseInt(u._id.toString().slice(-6), 16);
+        return convertedId === deposit.userId;
+      });
+      
+      if (!user) {
+        throw new Error('User not found');
+      }
+      
       const newDeposit = new Deposit({
-        userId: new mongoose.Types.ObjectId(deposit.userId.toString().padStart(24, '0')),
+        userId: user._id,
         amount: deposit.amount,
         receiptUrl: deposit.receiptUrl || null,
         status: "pending",
@@ -166,8 +192,19 @@ export class MongoStorage implements IStorage {
   async createWithdrawal(withdrawal: any): Promise<any> {
     if (!this.isConnected) throw new Error('MongoDB not connected');
     try {
+      // Find user by converted ID to get real ObjectId
+      const users = await User.find();
+      const user = users.find(u => {
+        const convertedId = parseInt(u._id.toString().slice(-6), 16);
+        return convertedId === withdrawal.userId;
+      });
+      
+      if (!user) {
+        throw new Error('User not found');
+      }
+      
       const newWithdrawal = new Withdrawal({
-        userId: new mongoose.Types.ObjectId(withdrawal.userId.toString().padStart(24, '0')),
+        userId: user._id,
         amount: withdrawal.amount,
         platform: withdrawal.platform,
         accountInfo: withdrawal.accountInfo,
@@ -232,13 +269,25 @@ export class MongoStorage implements IStorage {
   async createGameHistory(game: any): Promise<any> {
     if (!this.isConnected) throw new Error('MongoDB not connected');
     try {
+      // Find user by converted ID to get real ObjectId
+      const users = await User.find();
+      const user = users.find(u => {
+        const convertedId = parseInt(u._id.toString().slice(-6), 16);
+        return convertedId === game.userId;
+      });
+      
+      if (!user) {
+        throw new Error('User not found');
+      }
+      
       const newGame = new GameHistory({
-        userId: new mongoose.Types.ObjectId(game.userId.toString().padStart(24, '0')),
+        userId: user._id,
         gameType: game.gameType,
         betAmount: game.betAmount,
         winAmount: game.winAmount || "0.00",
         meowWon: game.meowWon || "0.00000000",
         result: game.result || null,
+        nonce: game.nonce || 1,
         createdAt: new Date()
       });
       const savedGame = await newGame.save();
@@ -343,10 +392,16 @@ export class MongoStorage implements IStorage {
   async banUser(userId: number, banned: boolean): Promise<void> {
     if (!this.isConnected) return;
     try {
-      await User.findOneAndUpdate(
-        { _id: new mongoose.Types.ObjectId(userId.toString().padStart(24, '0')) },
-        { isBanned: banned }
-      );
+      // Find user by converted ID
+      const users = await User.find();
+      const user = users.find(u => {
+        const convertedId = parseInt(u._id.toString().slice(-6), 16);
+        return convertedId === userId;
+      });
+      
+      if (user) {
+        await User.findOneAndUpdate({ _id: user._id }, { isBanned: banned });
+      }
     } catch (error) {
       console.error('Error banning user:', error);
     }
