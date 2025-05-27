@@ -263,7 +263,7 @@ export default function Farm() {
     
     // Find the corresponding farm cat data to get the correct ID and details
     const farmCat = farmData?.cats?.find((cat: any) => 
-      cat.catId === catData.catId && cat.level === catData.level
+      cat.catId === catData.catId
     );
     
     if (farmCat) {
@@ -273,10 +273,13 @@ export default function Farm() {
         ...farmCat,
         ...catType,
         id: farmCat.id, // Use the farm cat ID for upgrades
-        production: farmCat.production
+        production: farmCat.production,
+        level: farmCat.level // Use the actual farm cat level
       };
       setSelectedCat(completeData);
+      console.log('Selected cat with ID:', farmCat.id);
     } else {
+      console.error('Farm cat not found for catData:', catData);
       setSelectedCat(catData);
     }
     setShowCatDialog(true);

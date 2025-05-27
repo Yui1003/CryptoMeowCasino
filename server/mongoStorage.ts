@@ -132,40 +132,26 @@ export class MongoStorage implements IStorage {
   async createDeposit(deposit: any): Promise<any> {
     if (!this.isConnected) throw new Error('MongoDB not connected');
     try {
-      console.log('Creating deposit for userId:', deposit.userId, 'type:', typeof deposit.userId);
-      
       // Find user by converted ID to get real ObjectId
       const users = await User.find();
-      console.log('Found users count:', users.length);
-      
       const user = users.find(u => {
         const convertedId = parseInt(u._id.toString().slice(-6), 16);
-        console.log('Comparing convertedId:', convertedId, 'with userId:', deposit.userId);
         return convertedId === deposit.userId;
       });
       
       if (!user) {
-        console.error('User not found for userId:', deposit.userId);
-        console.log('Available user IDs:', users.map(u => ({
-          mongoId: u._id.toString(),
-          convertedId: parseInt(u._id.toString().slice(-6), 16),
-          username: u.username
-        })));
         throw new Error('User not found');
       }
-      
-      console.log('Found user:', user.username, 'mongoId:', user._id.toString());
       
       const newDeposit = new Deposit({
         userId: user._id,
         amount: deposit.amount,
-        paymentMethod: deposit.paymentMethod || 'unknown',
+        paymentMethod: deposit.paymentMethod,
         receiptUrl: deposit.receiptUrl || null,
         status: "pending",
         createdAt: new Date()
       });
       const savedDeposit = await newDeposit.save();
-      console.log('Deposit created successfully:', savedDeposit._id.toString());
       return this.convertMongoDeposit(savedDeposit);
     } catch (error) {
       console.error('Error creating deposit:', error);
@@ -482,8 +468,6 @@ export class MongoStorage implements IStorage {
       };
     }
     try {
-      console.log('Getting farm data for userId:', userId);
-      
       // Find user by converted ID to get real ObjectId
       const users = await User.find();
       const user = users.find(u => {
@@ -492,47 +476,42 @@ export class MongoStorage implements IStorage {
       });
       
       if (!user) {
-        console.log('User not found for farm data, returning empty farm');
         return {
           cats: [],
           totalProduction: 0,
           unclaimedMeow: "0.00000000"
         };
       }
-      
-      console.log('Found user for farm data:', user.username);
-      
-      const cats = await FarmCat.find({ userId: user._id });
-      console.log('Found cats:', cats.length);
-      
+
+      const cats = await FarmCat.find({
+        userId: user._id
+      });
+
       let totalProduction = 0;
-      let totalUnclaimed = 0;
+      let unclaimedMeow = 0;
       const now = new Date();
-      
-      const catsData = cats.map(cat => {
-        const production = parseFloat(cat.production.toString());
-        totalProduction += production;
-        
-        // Calculate unclaimed rewards based on time since last claim
+
+      const catsWithRewards = cats.map(cat => {
         const timeSinceLastClaim = (now.getTime() - new Date(cat.lastClaimed).getTime()) / (1000 * 60 * 60); // hours
-        const unclaimedForCat = production * timeSinceLastClaim;
-        totalUnclaimed += unclaimedForCat;
-        
+        const rewards = parseFloat(cat.production.toString()) * timeSinceLastClaim;
+        totalProduction += parseFloat(cat.production.toString());
+        unclaimedMeow += rewards;
+
         return {
           id: parseInt(cat._id.toString().slice(-6), 16),
           userId: parseInt(cat.userId.toString().slice(-6), 16),
           catId: cat.catId,
           level: cat.level,
-          production: production,
-          lastClaimed: cat.lastClaimed,
+          production: parseFloat(cat.production.toString()),
+          lastClaim: cat.lastClaimed.toISOString(),
           createdAt: cat.createdAt
         };
       });
-      
+
       return {
-        cats: catsData,
+        cats: catsWithRewards,
         totalProduction,
-        unclaimedMeow: totalUnclaimed.toFixed(8)
+        unclaimedMeow: unclaimedMeow.toFixed(8)
       };
     } catch (error) {
       console.error('Error getting farm data:', error);
@@ -547,8 +526,19 @@ export class MongoStorage implements IStorage {
   async createFarmCat(data: { userId: number; catId: string; production: number }): Promise<any> {
     if (!this.isConnected) return null;
     try {
+      // Find user by converted ID to get real ObjectId
+      const users = await User.find();
+      const user = users.find(u => {
+        const convertedId = parseInt(u._id.toString().slice(-6), 16);
+        return convertedId === data.userId;
+      });
+      
+      if (!user) {
+        throw new Error('User not found');
+      }
+      
       const farmCat = new FarmCat({
-        userId: new mongoose.Types.ObjectId(data.userId.toString().padStart(24, '0')),
+        userId: user._id,
         catId: data.catId,
         production: data.production,
         level: 1,
@@ -574,14 +564,21 @@ export class MongoStorage implements IStorage {
   async getFarmCat(id: number): Promise<any> {
     if (!this.isConnected) return null;
     try {
-      const cat = await FarmCat.findOne({ _id: new mongoose.Types.ObjectId(id.toString().padStart(24, '0')) });
+      // Find cat by converted ID
+      const cats = await FarmCat.find();
+      const cat = cats.find(c => {
+        const convertedId = parseInt(c._id.toString().slice(-6), 16);
+        return convertedId === id;
+      });
+      
       if (!cat) return null;
+      
       return {
         id: parseInt(cat._id.toString().slice(-6), 16),
-        userId: parseInt(cat.userId.toString()),
+        userId: parseInt(cat.userId.toString().slice(-6), 16),
         catId: cat.catId,
         level: cat.level,
-        production: cat.production,
+        production: parseFloat(cat.production.toString()),
         lastClaimed: cat.lastClaimed,
         createdAt: cat.createdAt
       };
@@ -594,10 +591,19 @@ export class MongoStorage implements IStorage {
   async upgradeFarmCat(id: number, level: number, production: number): Promise<void> {
     if (!this.isConnected) return;
     try {
-      await FarmCat.findOneAndUpdate(
-        { _id: new mongoose.Types.ObjectId(id.toString().padStart(24, '0')) },
-        { level, production }
-      );
+      // Find cat by converted ID to get real ObjectId
+      const cats = await FarmCat.find();
+      const cat = cats.find(c => {
+        const convertedId = parseInt(c._id.toString().slice(-6), 16);
+        return convertedId === id;
+      });
+      
+      if (cat) {
+        await FarmCat.findOneAndUpdate(
+          { _id: cat._id },
+          { level, production }
+        );
+      }
     } catch (error) {
       console.error('Error upgrading farm cat:', error);
     }
@@ -606,10 +612,19 @@ export class MongoStorage implements IStorage {
   async claimFarmRewards(userId: number): Promise<void> {
     if (!this.isConnected) return;
     try {
-      await FarmCat.updateMany(
-        { userId: new mongoose.Types.ObjectId(userId.toString().padStart(24, '0')) },
-        { lastClaimed: new Date() }
-      );
+      // Find user by converted ID to get real ObjectId
+      const users = await User.find();
+      const user = users.find(u => {
+        const convertedId = parseInt(u._id.toString().slice(-6), 16);
+        return convertedId === userId;
+      });
+      
+      if (user) {
+        await FarmCat.updateMany(
+          { userId: user._id },
+          { lastClaimed: new Date() }
+        );
+      }
     } catch (error) {
       console.error('Error claiming farm rewards:', error);
     }

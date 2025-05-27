@@ -113,12 +113,14 @@ export interface IFarmCat extends Document {
 }
 
 // Farm Cat Schema
-const farmCatSchema = new Schema<IFarmCat>({
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+const farmCatSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   catId: { type: String, required: true },
   level: { type: Number, default: 1 },
   production: { type: Number, required: true },
   lastClaimed: { type: Date, default: Date.now },
+  happiness: { type: Number, default: 50 },
+  name: { type: String, default: null },
   createdAt: { type: Date, default: Date.now }
 });
 

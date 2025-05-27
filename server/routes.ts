@@ -211,6 +211,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { amount, paymentMethod } = req.body;
 
+      if (!amount) {
+        return res.status(400).json({ message: "Amount is required" });
+      }
+
+      if (!paymentMethod) {
+        return res.status(400).json({ message: "Payment method is required" });
+      }
+
       if (!req.file) {
         return res.status(400).json({ message: "Receipt file is required" });
       }
@@ -218,8 +226,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const receiptUrl = `/uploads/${req.file.filename}`;
 
       const depositData = {
-        amount,
-        paymentMethod,
+        amount: amount.toString(),
+        paymentMethod: paymentMethod.toString(),
         receiptUrl
       };
 
@@ -237,7 +245,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         return res.status(400).json({ message: "File upload error: " + error.message });
       }
-      res.status(400).json({ message: "Invalid deposit data" });
+      res.status(400).json({ message: "Invalid deposit data: " + (error as Error).message });
     }
   });
 
@@ -581,14 +589,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { farmCatId } = req.body;
       const userId = req.session.userId!;
 
-      const catId = typeof farmCatId === 'string' ? parseInt(farmCatId) : farmCatId;
+      console.log('Upgrade cat request:', { farmCatId, userId });
+
+      // Handle both string and number IDs
+      let catId;
+      if (typeof farmCatId === 'string') {
+        catId = parseInt(farmCatId);
+      } else if (typeof farmCatId === 'number') {
+        catId = farmCatId;
+      } else {
+        console.error('Invalid farmCatId type:', typeof farmCatId, farmCatId);
+        return res.status(400).json({ message: "Invalid farm cat ID format" });
+      }
 
       if (isNaN(catId)) {
+        console.error('farmCatId is NaN:', farmCatId);
         return res.status(400).json({ message: "Invalid farm cat ID" });
       }
 
       const farmCat = await storage.getFarmCat(catId);
-      if (!farmCat || farmCat.userId !== userId) {
+      console.log('Found farm cat:', farmCat);
+      
+      if (!farmCat) {
+        console.error('Farm cat not found with ID:', catId);
+        return res.status(404).json({ message: "Cat not found" });
+      }
+      
+      if (farmCat.userId !== userId) {
+        console.error('Cat belongs to different user:', farmCat.userId, 'vs', userId);
         return res.status(404).json({ message: "Cat not found" });
       }
 
