@@ -1139,6 +1139,11 @@ export class FarmScene extends Phaser.Scene {
 
   private startMouseMovement(mouse: Phaser.GameObjects.Sprite, mouseIndex: number) {
     const moveRandomly = () => {
+      // Check if mouse still exists and scene is still active
+      if (!mouse || !mouse.scene || !this.cameras.main) {
+        return;
+      }
+
       const grassStartY = this.cameras.main.height * 0.3;
       const newX = Phaser.Math.Between(100, this.cameras.main.width - 100);
       const newY = Phaser.Math.Between(grassStartY + 50, this.cameras.main.height - 100);
@@ -1156,7 +1161,9 @@ export class FarmScene extends Phaser.Scene {
         onComplete: () => {
           // Wait a bit before next movement
           setTimeout(() => {
-            moveRandomly();
+            if (mouse && mouse.scene) {
+              moveRandomly();
+            }
           }, Phaser.Math.Between(1000, 3000));
         }
       });
@@ -1164,7 +1171,9 @@ export class FarmScene extends Phaser.Scene {
 
     // Start initial movement with different delays for each mouse
     setTimeout(() => {
-      moveRandomly();
+      if (mouse && mouse.scene) {
+        moveRandomly();
+      }
     }, mouseIndex * 1000);
   }
 

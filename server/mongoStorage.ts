@@ -132,25 +132,40 @@ export class MongoStorage implements IStorage {
   async createDeposit(deposit: any): Promise<any> {
     if (!this.isConnected) throw new Error('MongoDB not connected');
     try {
+      console.log('Creating deposit for userId:', deposit.userId, 'type:', typeof deposit.userId);
+      
       // Find user by converted ID to get real ObjectId
       const users = await User.find();
+      console.log('Found users count:', users.length);
+      
       const user = users.find(u => {
         const convertedId = parseInt(u._id.toString().slice(-6), 16);
+        console.log('Comparing convertedId:', convertedId, 'with userId:', deposit.userId);
         return convertedId === deposit.userId;
       });
       
       if (!user) {
+        console.error('User not found for userId:', deposit.userId);
+        console.log('Available user IDs:', users.map(u => ({
+          mongoId: u._id.toString(),
+          convertedId: parseInt(u._id.toString().slice(-6), 16),
+          username: u.username
+        })));
         throw new Error('User not found');
       }
+      
+      console.log('Found user:', user.username, 'mongoId:', user._id.toString());
       
       const newDeposit = new Deposit({
         userId: user._id,
         amount: deposit.amount,
+        paymentMethod: deposit.paymentMethod || 'unknown',
         receiptUrl: deposit.receiptUrl || null,
         status: "pending",
         createdAt: new Date()
       });
       const savedDeposit = await newDeposit.save();
+      console.log('Deposit created successfully:', savedDeposit._id.toString());
       return this.convertMongoDeposit(savedDeposit);
     } catch (error) {
       console.error('Error creating deposit:', error);
@@ -467,22 +482,57 @@ export class MongoStorage implements IStorage {
       };
     }
     try {
-      const cats = await FarmCat.find({
-        userId: new mongoose.Types.ObjectId(userId.toString().padStart(24, '0'))
+      console.log('Getting farm data for userId:', userId);
+      
+      // Find user by converted ID to get real ObjectId
+      const users = await User.find();
+      const user = users.find(u => {
+        const convertedId = parseInt(u._id.toString().slice(-6), 16);
+        return convertedId === userId;
       });
-      const totalProduction = cats.reduce((sum, cat) => sum + cat.production, 0);
-      return {
-        cats: cats.map(cat => ({
+      
+      if (!user) {
+        console.log('User not found for farm data, returning empty farm');
+        return {
+          cats: [],
+          totalProduction: 0,
+          unclaimedMeow: "0.00000000"
+        };
+      }
+      
+      console.log('Found user for farm data:', user.username);
+      
+      const cats = await FarmCat.find({ userId: user._id });
+      console.log('Found cats:', cats.length);
+      
+      let totalProduction = 0;
+      let totalUnclaimed = 0;
+      const now = new Date();
+      
+      const catsData = cats.map(cat => {
+        const production = parseFloat(cat.production.toString());
+        totalProduction += production;
+        
+        // Calculate unclaimed rewards based on time since last claim
+        const timeSinceLastClaim = (now.getTime() - new Date(cat.lastClaimed).getTime()) / (1000 * 60 * 60); // hours
+        const unclaimedForCat = production * timeSinceLastClaim;
+        totalUnclaimed += unclaimedForCat;
+        
+        return {
           id: parseInt(cat._id.toString().slice(-6), 16),
-          userId: parseInt(cat.userId.toString()),
+          userId: parseInt(cat.userId.toString().slice(-6), 16),
           catId: cat.catId,
           level: cat.level,
-          production: cat.production,
+          production: production,
           lastClaimed: cat.lastClaimed,
           createdAt: cat.createdAt
-        })),
+        };
+      });
+      
+      return {
+        cats: catsData,
         totalProduction,
-        unclaimedMeow: "0.00000000"
+        unclaimedMeow: totalUnclaimed.toFixed(8)
       };
     } catch (error) {
       console.error('Error getting farm data:', error);
