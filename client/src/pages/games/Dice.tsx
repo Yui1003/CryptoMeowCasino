@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import BettingPanel from "@/components/BettingPanel";
 import { generateServerSeed, generateClientSeed, calculateResult, diceResult } from "@/lib/provablyFair";
+import { soundManager } from "@/lib/sounds";
 import { Dice6, RotateCcw, Target } from "lucide-react";
 
 type GameMode = "over" | "under" | "range";
@@ -76,6 +77,9 @@ export default function Dice() {
 
     setIsRolling(true);
     
+    // Play dice roll sound
+    soundManager.play('diceRoll', 0.3);
+    
     const serverSeed = generateServerSeed();
     const clientSeed = generateClientSeed();
     const nonce = Date.now();
@@ -113,11 +117,17 @@ export default function Dice() {
       const winAmount = won ? selectedBet * multiplier : 0;
       
       if (won) {
+        // Play win sound
+        soundManager.play('diceWin', 0.4);
+        
         toast({
           title: "🎉 You Won!",
           description: `Rolled ${roll}! You won ${winAmount.toFixed(2)} coins!`,
         });
       } else {
+        // Play lose sound
+        soundManager.play('diceLose', 0.3);
+        
         toast({
           title: "💔 You Lost!",
           description: `Rolled ${roll}. Better luck next time!`,

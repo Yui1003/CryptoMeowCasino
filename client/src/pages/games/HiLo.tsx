@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import BettingPanel from "@/components/BettingPanel";
 import { generateServerSeed, generateClientSeed, calculateResult, hiloResult } from "@/lib/provablyFair";
+import { soundManager } from "@/lib/sounds";
 import { RotateCcw, TrendingUp, TrendingDown, Spade, Heart, Diamond, Club } from "lucide-react";
 
 type Suit = "spades" | "hearts" | "diamonds" | "clubs";
@@ -124,6 +125,9 @@ export default function HiLo() {
     setNextCard(next);
     setNonce(nextNonce); // Update nonce state
 
+    // Play card flip sound
+    soundManager.play('cardFlip', 0.3);
+
     const isCorrect = isHigher ? next.value > currentCard.value : next.value < currentCard.value;
 
     if (isCorrect) {
@@ -140,6 +144,9 @@ export default function HiLo() {
         currentCardName: currentCard.name,
         nextCardName: next.name
       }]);
+
+      // Play correct sound
+      soundManager.play('cardCorrect', 0.4);
 
       toast({
         title: "✅ Correct!",
@@ -164,6 +171,9 @@ export default function HiLo() {
 
       // Wrong guess always results in 0 winnings, regardless of streak
       const winAmount = 0;
+
+      // Play wrong sound
+      soundManager.play('cardWrong', 0.4);
 
       toast({
         title: "💥 Wrong!",
@@ -193,6 +203,9 @@ export default function HiLo() {
 
     const winAmount = selectedBet * multiplier;
     setGameState("ended");
+
+    // Play cash out sound
+    soundManager.play('mineCashOut', 0.4);
 
     toast({
       title: "💰 Cashed Out!",

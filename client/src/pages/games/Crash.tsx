@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import BettingPanel from "@/components/BettingPanel";
 import { generateServerSeed, generateClientSeed, calculateResult, crashResult } from "@/lib/provablyFair";
+import { soundManager } from "@/lib/sounds";
 import { TrendingUp, RotateCcw, Zap } from "lucide-react";
 
 type GameState = "waiting" | "rising" | "crashed" | "cashed_out";
@@ -76,6 +77,9 @@ export default function Crash() {
     setBetPlaced(true);
     startTimeRef.current = Date.now();
     
+    // Play rising sound
+    soundManager.play('crashRising', 0.2);
+    
     // Start the multiplier animation
     intervalRef.current = setInterval(() => {
       const elapsed = (Date.now() - startTimeRef.current) / 1000;
@@ -102,6 +106,9 @@ export default function Crash() {
         }
         setCurrentMultiplier(crash);
         setGameState("crashed");
+        
+        // Play crash sound
+        soundManager.play('crashLose', 0.5);
         
         // Player loses
         toast({
@@ -141,6 +148,9 @@ export default function Crash() {
     
     setGameState("cashed_out");
     const winAmount = selectedBet * multiplier;
+    
+    // Play cash out sound
+    soundManager.play('crashWin', 0.4);
     
     toast({
       title: "💰 Cashed Out!",

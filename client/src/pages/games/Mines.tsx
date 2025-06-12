@@ -21,6 +21,7 @@ import {
   calculateResult,
   minesResult,
 } from "@/lib/provablyFair";
+import { soundManager } from "@/lib/sounds";
 import { Bomb, Gem, RotateCcw } from "lucide-react";
 
 type TileState = "hidden" | "safe" | "mine";
@@ -157,6 +158,9 @@ export default function Mines() {
       setGameActive(false);
       revealAllMines();
 
+      // Play mine explosion sound
+      soundManager.play('mineExplode', 0.5);
+
       toast({
         title: "💥 Boom!",
         description: "You hit a mine! Better luck next time.",
@@ -177,6 +181,9 @@ export default function Mines() {
       // Safe tile revealed
       const newRevealedCount = revealedCount + 1;
 
+      // Play safe tile sound
+      soundManager.play('mineReveal', 0.2);
+
       if (newRevealedCount === 25 - mineCount) {
         // All safe tiles revealed - auto cash out
         revealAllMines();
@@ -194,6 +201,9 @@ export default function Mines() {
 
     // Reveal all tiles when cashing out
     revealAllMines();
+
+    // Play cash out sound
+    soundManager.play('mineCashOut', 0.4);
 
     const profit = winAmount - selectedBet;
     toast({

@@ -20,9 +20,12 @@ import {
   Shield,
   Sparkles,
   Coins,
-  Cat
+  Cat,
+  Volume2,
+  VolumeX
 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { soundManager } from "@/lib/sounds";
 
 // Particle component
 const Particle = ({ delay }: { delay: number }) => {
@@ -76,12 +79,24 @@ export default function Layout({ children }: LayoutProps) {
   const [location] = useLocation();
   const [particles, setParticles] = useState<number[]>([]);
   const [coins, setCoins] = useState<number[]>([]);
+  const [soundEnabled, setSoundEnabled] = useState(soundManager.isEnabled());
 
   // Initialize particles and coin rain
   useEffect(() => {
     setParticles(Array.from({ length: 20 }, (_, i) => i));
     setCoins(Array.from({ length: 8 }, (_, i) => i));
   }, []);
+
+  const toggleSound = () => {
+    const newSoundState = !soundEnabled;
+    setSoundEnabled(newSoundState);
+    soundManager.setEnabled(newSoundState);
+
+    // Play a test sound when enabling
+    if (newSoundState) {
+      soundManager.play('buttonClick', 0.2);
+    }
+  };
 
   if (!user && !["/login", "/register"].includes(location)) {
     return (
@@ -180,7 +195,7 @@ export default function Layout({ children }: LayoutProps) {
                   <span>🐱</span>
                   <span>Cat Farm</span>
                 </Link>
-                
+
                 {/* Games Dropdown */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -347,6 +362,20 @@ export default function Layout({ children }: LayoutProps) {
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
+
+                   <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={toggleSound}
+                    className="border-crypto-pink/30 hover:bg-crypto-pink"
+                    title={soundEnabled ? "Disable sounds" : "Enable sounds"}
+                  >
+                    {soundEnabled ? (
+                      <Volume2 className="w-4 h-4" />
+                    ) : (
+                      <VolumeX className="w-4 h-4" />
+                    )}
+                  </Button>
                 </div>
               </>
             )}

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -21,16 +20,38 @@ const SYMBOLS = [
   { symbol: "7️⃣", value: "seven", color: "text-red-600", multiplier: 10 },
 ];
 
+// Sound utility (place this outside the component)
+const soundManager = {
+  sounds: {} as Record<string, HTMLAudioElement>,
+  load: function(name: string, url: string) {
+    this.sounds[name] = new Audio(url);
+  },
+  play: function(name: string, volume: number = 1) {
+    if (this.sounds[name]) {
+      this.sounds[name].volume = volume;
+      this.sounds[name].play();
+    }
+  },
+  stop: function(name: string) {
+    if (this.sounds[name]) {
+      this.sounds[name].pause();
+      this.sounds[name].currentTime = 0;
+    }
+  }
+};
+
 export default function Wheel() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
+
   const [selectedBet, setSelectedBet] = useState(1.00);
   const [isSpinning, setIsSpinning] = useState(false);
   const [reels, setReels] = useState([0, 0, 0]);
   const [winningCombination, setWinningCombination] = useState<number[] | null>(null);
   const [spinHistory, setSpinHistory] = useState<{ symbols: string[], multiplier: number }[]>([]);
+    const [lastRoll, setLastRoll] = useState(0);
+
 
   const playGameMutation = useMutation({
     mutationFn: async (gameData: any) => {
@@ -60,7 +81,7 @@ export default function Wheel() {
       const otherIndex = Math.floor(((result - 0.08) * 7) % SYMBOLS.length);
       // Ensure other symbol is different
       const finalOtherIndex = otherIndex === symbolIndex ? (otherIndex + 1) % SYMBOLS.length : otherIndex;
-      
+
       // Randomly place the pair
       const positions = Math.floor((result - 0.08) * 3 / 0.17);
       if (positions < 1) {
@@ -75,17 +96,17 @@ export default function Wheel() {
       const seed1 = Math.floor(result * SYMBOLS.length);
       const seed2 = Math.floor((result * 7) % SYMBOLS.length);
       const seed3 = Math.floor((result * 13) % SYMBOLS.length);
-      
+
       // Ensure all three are different
       let symbol1 = seed1;
       let symbol2 = seed2 === symbol1 ? (seed2 + 1) % SYMBOLS.length : seed2;
       let symbol3 = seed3;
-      
+
       // Make sure symbol3 is different from both symbol1 and symbol2
       while (symbol3 === symbol1 || symbol3 === symbol2) {
         symbol3 = (symbol3 + 1) % SYMBOLS.length;
       }
-      
+
       return [symbol1, symbol2, symbol3];
     }
   };
@@ -96,7 +117,7 @@ export default function Wheel() {
       acc[index] = (acc[index] || 0) + 1;
       return acc;
     }, {} as Record<number, number>);
-    
+
     // Check for three of a kind
     for (const [index, count] of Object.entries(counts)) {
       if (count === 3) {
@@ -105,7 +126,7 @@ export default function Wheel() {
         return { multiplier, isWin: true, winType: "3 of a kind" };
       }
     }
-    
+
     // Check for two of a kind
     for (const [index, count] of Object.entries(counts)) {
       if (count === 2) {
@@ -114,7 +135,7 @@ export default function Wheel() {
         return { multiplier, isWin: true, winType: "2 of a kind" };
       }
     }
-    
+
     // No winning combination
     return { multiplier: 0, isWin: false, winType: "No match" };
   };
@@ -131,18 +152,21 @@ export default function Wheel() {
 
     setIsSpinning(true);
     setWinningCombination(null);
-    
+
+    // Play spin sound
+    soundManager.play('slotSpin', 0.3);
+
     const serverSeed = generateServerSeed();
     const clientSeed = generateClientSeed();
     const nonce = Math.floor(Math.random() * 1000000);
-    
+
     const result = calculateResult(serverSeed, clientSeed, nonce);
-    
+
     // Generate symbol combination based on result
     const symbolIndices = generateSymbolCombination(result);
-    
+
     const { multiplier, isWin, winType } = calculateWin(symbolIndices);
-    
+
     // Animate the reels
     const animationDuration = 2000;
     const reelAnimations = symbolIndices.map((_, index) => {
@@ -150,13 +174,9 @@ export default function Wheel() {
         let currentSymbol = reels[index];
         const interval = setInterval(() => {
           currentSymbol = (currentSymbol + 1) % SYMBOLS.length;
-          setReels(prev => {
-            const newReels = [...prev];
-            newReels[index] = currentSymbol;
-            return newReels;
-          });
+          setLastRoll(currentSymbol);
         }, 100);
-        
+
         setTimeout(() => {
           clearInterval(interval);
           setReels(prev => {
@@ -171,20 +191,26 @@ export default function Wheel() {
 
     Promise.all(reelAnimations).then(() => {
       setIsSpinning(false);
-      
+
       if (isWin) {
         setWinningCombination(symbolIndices);
         setTimeout(() => setWinningCombination(null), 3000);
       }
-      
+
       const winAmount = isWin ? selectedBet * multiplier : 0;
-      
+
       if (isWin) {
+        // Play win sound
+        soundManager.play('slotWin', 0.5);
+
         toast({
           title: "🎊 Winner!",
           description: `${winType}! You won ${winAmount.toFixed(2)} coins with ${multiplier}x multiplier!`,
         });
       } else {
+        // Play lose sound
+        soundManager.play('slotLose', 0.3);
+
         toast({
           title: "💥 No Win",
           description: `No matching symbols. Better luck next time!`,
@@ -206,7 +232,7 @@ export default function Wheel() {
           winType
         }),
       });
-      
+
       setSpinHistory(prev => [
         { 
           symbols: symbolIndices.map(i => SYMBOLS[i].symbol), 
@@ -226,6 +252,13 @@ export default function Wheel() {
 
   if (!user) return null;
 
+    // Load sounds on component mount
+    useState(() => {
+        soundManager.load('slotSpin', '/sounds/slot-spin.mp3'); // Replace with your sound file URL
+        soundManager.load('slotWin', '/sounds/slot-win.mp3');   // Replace with your sound file URL
+        soundManager.load('slotLose', '/sounds/slot-lose.mp3'); // Replace with your sound file URL
+    }, []);
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex items-center mb-8">
@@ -237,7 +270,7 @@ export default function Wheel() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8">
-        
+
         {/* Slot Machine */}
         <div className="lg:col-span-2 order-2 lg:order-1">
           <Card className="crypto-gray border-crypto-pink/20">
@@ -295,7 +328,7 @@ export default function Wheel() {
                     </div>
                   ))}
                 </div>
-                
+
                 {/* Game Mechanics */}
                 <div className="mt-4 p-3 bg-gray-800/50 rounded-lg">
                   <h4 className="text-sm font-semibold mb-2 text-crypto-pink">Game Mechanics</h4>
@@ -305,12 +338,12 @@ export default function Wheel() {
                     <p>• <span className="text-red-400">No Match:</span> All different symbols = No win</p>
                   </div>
                 </div>
-                
+
                 <div className="mt-2 text-xs text-gray-400">
                   <p>Win Rates: 8% (3 of a kind) • 17% (2 of a kind) • 75% (No match)</p>
                 </div>
               </div>
-              
+
               {/* Spin History */}
               <div className="mt-6">
                 <h3 className="text-sm font-medium text-gray-400 mb-2">Recent Spins</h3>
