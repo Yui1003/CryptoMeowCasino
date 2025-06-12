@@ -8,6 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import { Slider } from "@/components/ui/slider";
 import JackpotBanner from "./JackpotBanner";
 import { 
   User, 
@@ -22,9 +23,10 @@ import {
   Coins,
   Cat,
   Volume2,
-  VolumeX
+  VolumeX,
+  Music
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { soundManager } from "@/lib/sounds";
 
 // Particle component
@@ -80,12 +82,55 @@ export default function Layout({ children }: LayoutProps) {
   const [particles, setParticles] = useState<number[]>([]);
   const [coins, setCoins] = useState<number[]>([]);
   const [soundEnabled, setSoundEnabled] = useState(soundManager.isEnabled());
+  const [bgmEnabled, setBgmEnabled] = useState(true);
+  const [bgmVolume, setBgmVolume] = useState([50]);
+  const [showVolumeSlider, setShowVolumeSlider] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Initialize particles and coin rain
   useEffect(() => {
     setParticles(Array.from({ length: 20 }, (_, i) => i));
     setCoins(Array.from({ length: 8 }, (_, i) => i));
   }, []);
+
+  // Initialize background music
+  useEffect(() => {
+    // Create audio element for background music
+    const audio = new Audio();
+    audio.src = "/sounds/bgm.mp3"; // You'll need to add the background music file to public/sounds/
+    audio.loop = true;
+    audio.volume = bgmVolume[0] / 100;
+    audioRef.current = audio;
+
+    // Start playing if enabled
+    if (bgmEnabled && user) {
+      audio.play().catch(console.error);
+    }
+
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+    };
+  }, [user]);
+
+  // Update background music volume
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = bgmVolume[0] / 100;
+    }
+  }, [bgmVolume]);
+
+  // Toggle background music
+  useEffect(() => {
+    if (audioRef.current) {
+      if (bgmEnabled && user) {
+        audioRef.current.play().catch(console.error);
+      } else {
+        audioRef.current.pause();
+      }
+    }
+  }, [bgmEnabled, user]);
 
   const toggleSound = () => {
     const newSoundState = !soundEnabled;
@@ -97,6 +142,23 @@ export default function Layout({ children }: LayoutProps) {
       soundManager.play('buttonClick', 0.2);
     }
   };
+
+  const toggleBgm = () => {
+    setBgmEnabled(!bgmEnabled);
+  };
+
+  // Close volume slider when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (showVolumeSlider && !target.closest('.volume-slider-container')) {
+        setShowVolumeSlider(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showVolumeSlider]);
 
   if (!user && !["/login", "/register"].includes(location)) {
     return (
@@ -180,7 +242,7 @@ export default function Layout({ children }: LayoutProps) {
               <div className="w-8 h-8 sm:w-10 sm:h-10 gradient-pink rounded-lg flex items-center justify-center">
                 <span className="text-white text-lg sm:text-xl">🐱</span>
               </div>
-              <h1 className="text-lg sm:text-2xl font-bold gradient-pink bg-clip-text text-transparent">
+              <h1 className="hidden sm:block text-lg sm:text-2xl font-bold gradient-pink bg-clip-text text-transparent">
                 CryptoMeow
               </h1>
             </Link>
@@ -363,7 +425,8 @@ export default function Layout({ children }: LayoutProps) {
                     </DropdownMenuContent>
                   </DropdownMenu>
 
-                   <Button
+                   {/* Sound Controls */}
+                  <Button
                     variant="outline"
                     size="sm"
                     onClick={toggleSound}
@@ -376,6 +439,55 @@ export default function Layout({ children }: LayoutProps) {
                       <VolumeX className="w-4 h-4" />
                     )}
                   </Button>
+
+                  {/* Background Music Controls */}
+                  <div className="relative volume-slider-container">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowVolumeSlider(!showVolumeSlider)}
+                      className="border-crypto-pink/30 hover:bg-crypto-pink"
+                      title="Background Music"
+                    >
+                      <Music className="w-4 h-4" />
+                    </Button>
+                    
+                    {showVolumeSlider && (
+                      <div className="absolute top-full right-0 mt-2 p-4 crypto-gray border border-crypto-pink/20 rounded-lg shadow-lg z-50 min-w-[200px]">
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-300">Background Music</span>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={toggleBgm}
+                              className="h-6 w-6 p-0"
+                            >
+                              {bgmEnabled ? (
+                                <Volume2 className="w-3 h-3" />
+                              ) : (
+                                <VolumeX className="w-3 h-3" />
+                              )}
+                            </Button>
+                          </div>
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between text-xs text-gray-400">
+                              <span>Volume</span>
+                              <span>{bgmVolume[0]}%</span>
+                            </div>
+                            <Slider
+                              value={bgmVolume}
+                              onValueChange={setBgmVolume}
+                              max={100}
+                              step={1}
+                              className="w-full"
+                              disabled={!bgmEnabled}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </>
             )}

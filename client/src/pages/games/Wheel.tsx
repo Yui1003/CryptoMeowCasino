@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import BettingPanel from "@/components/BettingPanel";
 import { generateServerSeed, generateClientSeed, calculateResult } from "@/lib/provablyFair";
+import { soundManager } from "@/lib/sounds";
 import { Sparkles, RotateCcw } from "lucide-react";
 
 const SYMBOLS = [
@@ -20,25 +21,7 @@ const SYMBOLS = [
   { symbol: "7️⃣", value: "seven", color: "text-red-600", multiplier: 10 },
 ];
 
-// Sound utility (place this outside the component)
-const soundManager = {
-  sounds: {} as Record<string, HTMLAudioElement>,
-  load: function(name: string, url: string) {
-    this.sounds[name] = new Audio(url);
-  },
-  play: function(name: string, volume: number = 1) {
-    if (this.sounds[name]) {
-      this.sounds[name].volume = volume;
-      this.sounds[name].play();
-    }
-  },
-  stop: function(name: string) {
-    if (this.sounds[name]) {
-      this.sounds[name].pause();
-      this.sounds[name].currentTime = 0;
-    }
-  }
-};
+
 
 export default function Wheel() {
   const { user } = useAuth();
@@ -252,12 +235,7 @@ export default function Wheel() {
 
   if (!user) return null;
 
-    // Load sounds on component mount
-    useState(() => {
-        soundManager.load('slotSpin', '/sounds/slot-spin.mp3'); // Replace with your sound file URL
-        soundManager.load('slotWin', '/sounds/slot-win.mp3');   // Replace with your sound file URL
-        soundManager.load('slotLose', '/sounds/slot-lose.mp3'); // Replace with your sound file URL
-    }, []);
+    
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

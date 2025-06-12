@@ -179,20 +179,22 @@ export default function Home() {
                 <Button
                   asChild
                   variant="outline"
-                  className="crypto-black hover:bg-crypto-gray border-crypto-pink/30 transition-all hover:scale-105 hover:border-crypto-pink"
+                  size="sm"
+                  className="crypto-black hover:bg-crypto-gray border-crypto-pink/30 transition-all hover:scale-105 hover:border-crypto-pink text-xs h-8"
                 >
                   <Link href="/withdraw">
-                    <Download className="w-4 h-4 mr-1" />
+                    <Download className="w-3 h-3 mr-1" />
                     Withdraw
                   </Link>
                 </Button>
                 <Button
                   asChild
                   variant="outline"
-                  className="crypto-black hover:bg-crypto-gray border-crypto-pink/30 transition-all hover:scale-105 hover:border-crypto-pink"
+                  size="sm"
+                  className="crypto-black hover:bg-crypto-gray border-crypto-pink/30 transition-all hover:scale-105 hover:border-crypto-pink text-xs h-8"
                 >
                   <Link href="/farm">
-                    <Cat className="w-4 h-4 mr-1" />
+                    <Cat className="w-3 h-3 mr-1" />
                     Cat Farm
                   </Link>
                 </Button>
