@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { soundManager } from "@/lib/sounds";
+import { backgroundMusicManager } from "@/lib/backgroundMusicManager";
 
 // Particle component
 const Particle = ({ delay }: { delay: number }) => {
@@ -83,9 +84,8 @@ export default function Layout({ children }: LayoutProps) {
   const [coins, setCoins] = useState<number[]>([]);
   const [soundEnabled, setSoundEnabled] = useState(soundManager.isEnabled());
   const [bgmEnabled, setBgmEnabled] = useState(true);
-  const [bgmVolume, setBgmVolume] = useState([50]);
+  const [bgmVolume, setBgmVolume] = useState([backgroundMusicManager.getVolume() * 100]);
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Initialize particles and coin rain
   useEffect(() => {
@@ -93,44 +93,27 @@ export default function Layout({ children }: LayoutProps) {
     setCoins(Array.from({ length: 8 }, (_, i) => i));
   }, []);
 
-  // Initialize background music
+  // Initialize background music when user logs in
   useEffect(() => {
-    // Create audio element for background music
-    const audio = new Audio();
-    audio.src = "/sounds/bgm.mp3"; // You'll need to add the background music file to public/sounds/
-    audio.loop = true;
-    audio.volume = bgmVolume[0] / 100;
-    audioRef.current = audio;
-
-    // Start playing if enabled
-    if (bgmEnabled && user) {
-      audio.play().catch(console.error);
+    if (user && bgmEnabled) {
+      backgroundMusicManager.play();
+    } else if (!user) {
+      backgroundMusicManager.pause();
     }
-
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
-    };
   }, [user]);
 
   // Update background music volume
   useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = bgmVolume[0] / 100;
-    }
+    backgroundMusicManager.setVolume(bgmVolume[0] / 100);
   }, [bgmVolume]);
 
   // Toggle background music
   useEffect(() => {
-    if (audioRef.current) {
-      if (bgmEnabled && user) {
-        audioRef.current.play().catch(console.error);
-      } else {
-        audioRef.current.pause();
-      }
+    backgroundMusicManager.setEnabled(bgmEnabled);
+    if (bgmEnabled && user) {
+      backgroundMusicManager.play();
     }
-  }, [bgmEnabled, user]);
+  }, [bgmEnabled]);
 
   const toggleSound = () => {
     const newSoundState = !soundEnabled;
@@ -144,7 +127,9 @@ export default function Layout({ children }: LayoutProps) {
   };
 
   const toggleBgm = () => {
-    setBgmEnabled(!bgmEnabled);
+    const newState = !bgmEnabled;
+    setBgmEnabled(newState);
+    backgroundMusicManager.setEnabled(newState);
   };
 
   // Close volume slider when clicking outside
