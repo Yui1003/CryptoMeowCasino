@@ -13,11 +13,11 @@ interface BettingPanelProps {
 export default function BettingPanel({ selectedBet, onBetSelect }: BettingPanelProps) {
   return (
     <Card className="crypto-gray border-crypto-pink/20">
-      <CardHeader>
-        <CardTitle className="text-xl font-bold">Betting Options</CardTitle>
+      <CardHeader className="pb-3 lg:pb-6">
+        <CardTitle className="text-lg lg:text-xl">Betting Options</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-11 gap-2 mb-4">
+      <CardContent className="space-y-3 lg:space-y-4">
+        <div className="grid grid-cols-4 gap-1.5 lg:gap-2 mb-3 lg:mb-4">
           {BET_AMOUNTS.map((amount) => (
             <Button
               key={amount}
@@ -36,7 +36,7 @@ export default function BettingPanel({ selectedBet, onBetSelect }: BettingPanelP
             </Button>
           ))}
         </div>
-        
+
         <div className="flex items-center justify-between text-sm">
           <div className="text-gray-400">
             Selected Bet: <span className="text-crypto-pink font-semibold">{selectedBet.toFixed(2)}</span> Coins

@@ -158,21 +158,21 @@ export default function Layout({ children }: LayoutProps) {
       )}
       {/* Navigation Header */}
       <nav className="crypto-gray border-b border-crypto-pink/20 sticky top-0 z-50 glass relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-14 sm:h-16">
             {/* Logo */}
-            <Link href="/" className="flex items-center space-x-3">
-              <div className="w-10 h-10 gradient-pink rounded-lg flex items-center justify-center">
-                <span className="text-white text-xl">🐱</span>
+            <Link href="/" className="flex items-center space-x-2 sm:space-x-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 gradient-pink rounded-lg flex items-center justify-center">
+                <span className="text-white text-lg sm:text-xl">🐱</span>
               </div>
-              <h1 className="text-2xl font-bold gradient-pink bg-clip-text text-transparent">
+              <h1 className="text-lg sm:text-2xl font-bold gradient-pink bg-clip-text text-transparent">
                 CryptoMeow
               </h1>
             </Link>
 
             {/* Navigation Links */}
             {user && (
-              <div className="flex items-center space-x-6">
+              <div className="hidden md:flex items-center space-x-6">
                 <Link href="/" className="text-gray-300 hover:text-white transition-colors">
                   Casino
                 </Link>
@@ -226,20 +226,75 @@ export default function Layout({ children }: LayoutProps) {
 
             {user && (
               <>
+                {/* Mobile Menu */}
+                <div className="md:hidden ml-auto">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="text-gray-300 hover:text-white px-2">
+                        ☰
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="crypto-gray border-crypto-pink/20">
+                      <DropdownMenuItem asChild>
+                        <Link href="/" className="flex items-center space-x-2">
+                          <span>🎰</span>
+                          <span>Casino</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/farm" className="flex items-center space-x-2">
+                          <span>🐱</span>
+                          <span>Cat Farm</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/games/mines" className="flex items-center space-x-2">
+                          <span>💣</span>
+                          <span>Mines</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/games/crash" className="flex items-center space-x-2">
+                          <span>📈</span>
+                          <span>Crash</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/games/wheel" className="flex items-center space-x-2">
+                          <span>🎡</span>
+                          <span>Wheel</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/games/hilo" className="flex items-center space-x-2">
+                          <span>🎯</span>
+                          <span>Hi-Lo</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/games/dice" className="flex items-center space-x-2">
+                          <span>🎲</span>
+                          <span>Dice</span>
+                        </Link>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+
                 {/* User Balance & Controls */}
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2 md:space-x-4">
                   {/* Balance Display */}
-                  <div className="flex items-center space-x-3 crypto-black/50 rounded-lg px-4 py-2 border border-crypto-pink/30">
+                  <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-3 crypto-black/50 rounded-lg px-1 sm:px-2 md:px-4 py-1 sm:py-2 border border-crypto-pink/30">
                     <div className="text-center">
                       <div className="text-xs text-gray-400">Coins</div>
-                      <div className="text-lg font-bold crypto-green">
+                      <div className="text-xs sm:text-sm md:text-lg font-bold crypto-green">
                         {parseFloat(user.balance).toFixed(2)}
                       </div>
                     </div>
-                    <div className="w-px h-8 bg-crypto-pink/30"></div>
+                    <div className="w-px h-4 sm:h-6 md:h-8 bg-crypto-pink/30"></div>
                     <div className="text-center">
                       <div className="text-xs text-gray-400">$MEOW</div>
-                      <div className="text-lg font-bold text-crypto-pink">
+                      <div className="text-xs sm:text-sm md:text-lg font-bold text-crypto-pink">
                         {parseFloat(user.meowBalance).toFixed(4)}
                       </div>
                     </div>
@@ -248,11 +303,11 @@ export default function Layout({ children }: LayoutProps) {
                   {/* User Menu */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button className="crypto-pink hover:bg-crypto-pink-light flex items-center space-x-2">
-                        <User className="w-4 h-4" />
-                        <span>{user.username}</span>
+                      <Button className="crypto-pink hover:bg-crypto-pink-light flex items-center space-x-1 md:space-x-2 px-2 md:px-4 py-1 sm:py-2">
+                        <User className="w-3 h-3 sm:w-4 sm:h-4" />
+                        <span className="hidden sm:inline text-sm">{user.username}</span>
                         {user.isAdmin && (
-                          <Badge variant="secondary" className="ml-2">
+                          <Badge variant="secondary" className="hidden md:flex ml-2">
                             <Shield className="w-3 h-3 mr-1" />
                             Admin
                           </Badge>

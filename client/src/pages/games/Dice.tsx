@@ -166,10 +166,10 @@ export default function Dice() {
         </Badge>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8">
         
         {/* Game Display */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 order-2 lg:order-1">
           <Card className="crypto-gray border-crypto-pink/20">
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
@@ -243,7 +243,7 @@ export default function Dice() {
         </div>
 
         {/* Game Controls */}
-        <div className="space-y-6">
+        <div className="space-y-4 lg:space-y-6 order-1 lg:order-2">
           <Card className="crypto-gray border-crypto-pink/20">
             <CardHeader>
               <CardTitle>Game Settings</CardTitle>

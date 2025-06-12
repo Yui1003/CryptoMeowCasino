@@ -76,7 +76,7 @@ export default function Mines() {
     setServerSeed(newServerSeed);
     setClientSeed(newClientSeed);
     setNonce(0);
-    
+
     // Pre-generate mine positions
     generateMinePositions(newServerSeed, newClientSeed);
   };
@@ -91,27 +91,27 @@ export default function Mines() {
       hash = ((hash << 5) - hash) + char;
       hash = hash & hash; // Convert to 32bit integer
     }
-    
+
     // Use the hash to seed a simple random number generator
     let seed = Math.abs(hash);
     const random = () => {
       seed = (seed * 9301 + 49297) % 233280;
       return seed / 233280;
     };
-    
+
     // Generate exactly mineCount unique positions
     const positions = new Set<number>();
     while (positions.size < mineCount) {
       const position = Math.floor(random() * 25);
       positions.add(position);
     }
-    
+
     return Array.from(positions);
   };
 
   const revealAllMines = () => {
     const minePositions = generateMinePositions(serverSeed, clientSeed);
-    
+
     setTiles(prev => prev.map(tile => {
       if (!tile.revealed) {
         const isMine = minePositions.includes(tile.id);
@@ -156,7 +156,7 @@ export default function Mines() {
       // Game over - hit mine - reveal all mines
       setGameActive(false);
       revealAllMines();
-      
+
       toast({
         title: "💥 Boom!",
         description: "You hit a mine! Better luck next time.",
@@ -191,7 +191,7 @@ export default function Mines() {
     // Use the exact same multiplier that's displayed on screen
     const winAmount = selectedBet * currentMultiplier;
     setGameActive(false);
-    
+
     // Reveal all tiles when cashing out
     revealAllMines();
 
@@ -234,8 +234,9 @@ export default function Mines() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
         {/* Game Board */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 order-1 lg:order-1">
           <Card className="crypto-gray border-crypto-pink/20">
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
@@ -357,7 +358,7 @@ export default function Mines() {
                 <Button
                   onClick={() => cashOut()}
                   disabled={revealedCount === 0}
-                  className="w-full bg-crypto-green hover:bg-green-500 text-black font-semibold"
+                  className="w-full bg-crypto-green hover:bg-green-500 text-white font-semibold"
                 >
                   Cash Out ({potentialWin} coins)
                 </Button>

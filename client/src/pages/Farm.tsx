@@ -263,7 +263,7 @@ export default function Farm() {
     
     // Find the corresponding farm cat data to get the correct ID and details
     const farmCat = farmData?.cats?.find((cat: any) => 
-      cat.catId === catData.catId
+      cat.catId === catData.catId && cat.level === catData.level
     );
     
     if (farmCat) {
@@ -273,13 +273,10 @@ export default function Farm() {
         ...farmCat,
         ...catType,
         id: farmCat.id, // Use the farm cat ID for upgrades
-        production: farmCat.production,
-        level: farmCat.level // Use the actual farm cat level
+        production: farmCat.production
       };
       setSelectedCat(completeData);
-      console.log('Selected cat with ID:', farmCat.id);
     } else {
-      console.error('Farm cat not found for catData:', catData);
       setSelectedCat(catData);
     }
     setShowCatDialog(true);
@@ -298,72 +295,8 @@ export default function Farm() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Farm Stats */}
-        <div className="lg:col-span-1 space-y-4">
-          <Card className="crypto-gray border-crypto-pink/20">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg flex items-center">
-                <Coins className="w-5 h-5 crypto-gold mr-2" />
-                Farm Stats
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4 text-center">
-              <div>
-                <div className="text-sm text-gray-400">Your $MEOW Balance</div>
-                <div className="text-xl font-bold text-crypto-pink">
-                  {parseFloat(user.meowBalance || "0").toFixed(6)}
-                </div>
-              </div>
-
-              <div>
-                <div className="text-sm text-gray-400">Unclaimed Rewards</div>
-                <div className="text-lg font-semibold crypto-green">
-                  {unclaimedMeow.toFixed(6)}
-                </div>
-              </div>
-
-              <div>
-                <div className="text-sm text-gray-400">Production Rate</div>
-                <div className="text-lg font-semibold bg-pink-500 text-black py-2 px-4 rounded-md">
-                  {farmData
-                    ? `${parseFloat(farmData.totalProduction || "0").toFixed(6)}/hour`
-                    : "0.000000/hour"}
-                </div>
-              </div>
-
-              <Button
-                onClick={() => claimMutation.mutate()}
-                disabled={
-                  claimMutation.isPending ||
-                  unclaimedMeow <= 0
-                }
-                className="w-full bg-crypto-green hover:bg-green-500 text-white hover:text-black font-semibold"
-              >
-                <Zap className="w-4 h-4 mr-2" />
-                Claim Rewards
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* How to Play Instructions */}
-          <Card className="crypto-gray border-crypto-pink/20">
-            <CardContent className="p-3">
-              <div className="text-center">
-                <p className="text-sm text-gray-300 mb-2">
-                  🎮 <strong>How to Play:</strong> Buy cats from the shop • Click cats to view details and upgrade them • Cats automatically earn $MEOW over time • Higher level cats produce more!
-                </p>
-                <div className="flex justify-center gap-3 text-xs text-gray-400">
-                  <span>⬆️ Upgrade = +Production</span>
-                  <span>💰 Claim = Collect earnings</span>
-                  <span>🛒 Shop = Buy new cats</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Main Content */}
-        <div className="lg:col-span-3">
+        {/* Main Content - Show first on mobile, second on desktop */}
+        <div className="lg:col-span-3 order-1 lg:order-2">
           <Tabs defaultValue="game" className="space-y-6">
             <TabsList className="crypto-gray border-crypto-pink/20">
               <TabsTrigger value="game" className="flex items-center gap-2">
@@ -598,6 +531,70 @@ export default function Farm() {
               </div>
             </TabsContent>
           </Tabs>
+        </div>
+
+        {/* Farm Stats - Show second on mobile, first on desktop */}
+        <div className="lg:col-span-1 space-y-4 order-2 lg:order-1">
+          <Card className="crypto-gray border-crypto-pink/20">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center">
+                <Coins className="w-5 h-5 crypto-gold mr-2" />
+                Farm Stats
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 text-center">
+              <div>
+                <div className="text-sm text-gray-400">Your $MEOW Balance</div>
+                <div className="text-xl font-bold text-crypto-pink">
+                  {parseFloat(user.meowBalance || "0").toFixed(6)}
+                </div>
+              </div>
+
+              <div>
+                <div className="text-sm text-gray-400">Unclaimed Rewards</div>
+                <div className="text-lg font-semibold crypto-green">
+                  {unclaimedMeow.toFixed(6)}
+                </div>
+              </div>
+
+              <div>
+                <div className="text-sm text-gray-400">Production Rate</div>
+                <div className="text-lg font-semibold bg-pink-500 text-black py-2 px-4 rounded-md">
+                  {farmData
+                    ? `${parseFloat(farmData.totalProduction || "0").toFixed(6)}/hour`
+                    : "0.000000/hour"}
+                </div>
+              </div>
+
+              <Button
+                onClick={() => claimMutation.mutate()}
+                disabled={
+                  claimMutation.isPending ||
+                  unclaimedMeow <= 0
+                }
+                className="w-full bg-crypto-green hover:bg-green-500 text-white hover:text-black font-semibold"
+              >
+                <Zap className="w-4 h-4 mr-2" />
+                Claim Rewards
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* How to Play Instructions */}
+          <Card className="crypto-gray border-crypto-pink/20">
+            <CardContent className="p-3">
+              <div className="text-center">
+                <p className="text-sm text-gray-300 mb-2">
+                  🎮 <strong>How to Play:</strong> Buy cats from the shop • Click cats to view details and upgrade them • Cats automatically earn $MEOW over time • Higher level cats produce more!
+                </p>
+                <div className="flex justify-center gap-3 text-xs text-gray-400">
+                  <span>⬆️ Upgrade = +Production</span>
+                  <span>💰 Claim = Collect earnings</span>
+                  <span>🛒 Shop = Buy new cats</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
 

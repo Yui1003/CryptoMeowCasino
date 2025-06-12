@@ -112,7 +112,7 @@ export default function HiLo() {
     let nextNonce = nonce + streak + Math.floor(Math.random() * 1000) + 1;
     let result = calculateResult(serverSeed, clientSeed, nextNonce);
     let nextValue = hiloResult(result);
-    
+
     // Keep generating new cards until we don't get a tie
     while (nextValue === currentCard.value) {
       nextNonce += 1;
@@ -238,7 +238,7 @@ export default function HiLo() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
         {/* Game Display */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 order-1 lg:order-1">
           <Card className="crypto-gray border-crypto-pink/20">
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
@@ -370,7 +370,7 @@ export default function HiLo() {
         </div>
 
         {/* Game Controls */}
-        <div className="space-y-6">
+        <div className="space-y-6 order-2 lg:order-2">
           <Card className="crypto-gray border-crypto-pink/20">
             <CardHeader>
               <CardTitle>Game Stats</CardTitle>
@@ -409,7 +409,7 @@ export default function HiLo() {
                 <Button
                   onClick={cashOut}
                   disabled={streak === 0}
-                  className="w-full bg-crypto-green hover:bg-green-500 text-black font-semibold"
+                  className="w-full bg-crypto-green hover:bg-green-500 text-white font-semibold"
                 >
                   Cash Out ({(selectedBet * multiplier).toFixed(2)} coins)
                 </Button>

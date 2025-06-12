@@ -144,9 +144,112 @@ export default function Home() {
       </div>
 
       <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-12 gap-6">
-          {/* Sidebar */}
-          <div className="col-span-12 lg:col-span-3 animate-slide-in">
+        {/* Quick Actions - Always at top on mobile */}
+        <div className="mb-6 lg:hidden animate-slide-in">
+          <Card className="crypto-gray border-crypto-pink/20 backdrop-blur-sm bg-opacity-95 animate-glow hover-scale">
+            <CardHeader>
+              <CardTitle className="text-lg font-bold text-crypto-pink flex items-center animate-sparkle">
+                <Sparkles className="w-5 h-5 mr-2" />
+                Quick Actions
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Navigation Menu - Grid layout for mobile */}
+              <div className="grid grid-cols-2 gap-3">
+                <Button
+                  asChild
+                  variant="outline"
+                  className="crypto-black hover:bg-crypto-gray border-crypto-pink/30 transition-all hover:scale-105 hover:border-crypto-pink"
+                >
+                  <Link href="/wallet">
+                    <Wallet className="w-4 h-4 mr-1" />
+                    Wallet
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  variant="outline"
+                  className="crypto-black hover:bg-crypto-gray border-crypto-pink/30 transition-all hover:scale-105 hover:border-crypto-pink"
+                >
+                  <Link href="/deposit">
+                    <Upload className="w-4 h-4 mr-1" />
+                    Deposit
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  variant="outline"
+                  className="crypto-black hover:bg-crypto-gray border-crypto-pink/30 transition-all hover:scale-105 hover:border-crypto-pink"
+                >
+                  <Link href="/withdraw">
+                    <Download className="w-4 h-4 mr-1" />
+                    Withdraw
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  variant="outline"
+                  className="crypto-black hover:bg-crypto-gray border-crypto-pink/30 transition-all hover:scale-105 hover:border-crypto-pink"
+                >
+                  <Link href="/farm">
+                    <Cat className="w-4 h-4 mr-1" />
+                    Cat Farm
+                  </Link>
+                </Button>
+                {user.isAdmin && (
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="col-span-2 crypto-black hover:bg-crypto-gray border-crypto-pink/30 transition-all hover:scale-105 hover:border-crypto-pink"
+                  >
+                    <Link href="/admin">
+                      <Shield className="w-4 h-4 mr-2" />
+                      Admin Panel
+                    </Link>
+                  </Button>
+                )}
+              </div>
+
+              {/* Conversion Tool */}
+              <div className="border-t border-crypto-pink/20 pt-4">
+                <h3 className="font-semibold mb-3 text-crypto-pink flex items-center text-sm">
+                  <ArrowUpDown className="w-4 h-4 mr-2" />
+                  Convert $MEOW
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between text-sm">
+                    <span>1 $MEOW</span>
+                    <span className="crypto-green">= 5,000 Coins</span>
+                  </div>
+                  <div>
+                    <Input
+                      type="number"
+                      step="0.0001"
+                      min="0"
+                      placeholder="Enter $MEOW amount"
+                      value={meowToConvert}
+                      onChange={(e) => setMeowToConvert(e.target.value)}
+                      className="crypto-black border-crypto-pink/30 focus:border-crypto-pink"
+                    />
+                  </div>
+                  <Button
+                    onClick={handleConvert}
+                    disabled={convertMutation.isPending}
+                    className="w-full bg-crypto-green hover:bg-green-500 text-white hover:text-black font-semibold"
+                  >
+                    {convertMutation.isPending
+                      ? "Converting..."
+                      : "Convert to Coins"}
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Sidebar - Desktop only */}
+          <div className="hidden lg:block lg:col-span-3 animate-slide-in">
             <Card className="crypto-gray border-crypto-pink/20 backdrop-blur-sm bg-opacity-95 animate-glow hover-scale">
               <CardHeader>
                 <CardTitle className="text-xl font-bold text-crypto-pink flex items-center animate-sparkle">
@@ -206,6 +309,18 @@ export default function Home() {
                       Cat Farm
                     </Link>
                   </Button>
+                  {user.isAdmin && (
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="w-full crypto-black hover:bg-crypto-gray border-crypto-pink/30 transition-all hover:scale-105 hover:border-crypto-pink"
+                    >
+                      <Link href="/admin">
+                        <Shield className="w-4 h-4 mr-2" />
+                        Admin Panel
+                      </Link>
+                    </Button>
+                  )}
                 </div>
 
                 {/* Conversion Tool */}
@@ -250,7 +365,7 @@ export default function Home() {
           </div>
 
           {/* Main Content */}
-          <div className="col-span-12 lg:col-span-9 animate-fade-in">
+          <div className="lg:col-span-9 animate-fade-in">
             {/* Games Grid */}
             <div>
               <div className="flex items-center justify-between mb-6">
