@@ -26,16 +26,14 @@ class BackgroundMusicManager {
       console.log('bgm.mp3 not found');
     }
 
-    // Check for numbered tracks (bgm1.mp3, bgm2.mp3, etc.)
-    for (let i = 1; i <= 10; i++) {
-      try {
-        const response = await fetch(`/sounds/bgm${i}.mp3`, { method: 'HEAD' });
-        if (response.ok) {
-          tracks.push(`bgm${i}.mp3`);
-        }
-      } catch (error) {
-        // Track doesn't exist, continue checking
+    // Check for bgm1.mp3
+    try {
+      const response = await fetch('/sounds/bgm1.mp3', { method: 'HEAD' });
+      if (response.ok) {
+        tracks.push('bgm1.mp3');
       }
+    } catch (error) {
+      console.log('bgm1.mp3 not found');
     }
 
     console.log('Available music tracks:', tracks);
@@ -69,8 +67,9 @@ class BackgroundMusicManager {
       // Handle audio loading errors
       this.audio.addEventListener('error', (e) => {
         console.warn('Background music failed to load:', e);
-        if (!this.isLoadingNextTrack) {
-          this.playNextTrack(); // Try next track on error
+        // Only try next track if we have multiple tracks and haven't tried recently
+        if (!this.isLoadingNextTrack && this.availableTracks.length > 1) {
+          this.playNextTrack();
         }
       });
 
@@ -125,8 +124,8 @@ class BackgroundMusicManager {
       }
     } catch (error) {
       console.warn('Failed to play background music:', error);
-      // Try next track if current fails, but prevent infinite loops
-      if (!this.isLoadingNextTrack) {
+      // Only try next track if we have multiple tracks and haven't tried recently
+      if (!this.isLoadingNextTrack && this.availableTracks.length > 1) {
         this.playNextTrack();
       }
     }
