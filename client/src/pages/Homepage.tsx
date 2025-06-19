@@ -104,13 +104,13 @@ export default function Homepage() {
           <div className="w-24 h-24 gradient-pink rounded-full flex items-center justify-center mx-auto mb-6 animate-glow">
             <span className="text-4xl">🐱</span>
           </div>
-          <h1 className="text-5xl font-bold mb-4 gradient-pink bg-clip-text text-transparent animate-jackpot">
+          <h1 className="text-5xl font-display font-bold mb-4 gradient-pink bg-clip-text text-transparent animate-jackpot text-balance">
             Welcome to CryptoMeow
           </h1>
-          <p className="text-xl text-gray-300 mb-2">
-            Hello, <span className="text-crypto-pink font-semibold">{user.username}</span>!
+          <p className="text-xl font-body text-gray-300 mb-2">
+            Hello, <span className="text-crypto-pink font-crypto font-semibold">{user.username}</span>!
           </p>
-          <p className="text-lg text-gray-400 mb-8">
+          <p className="text-lg font-body text-gray-400 mb-8 text-pretty max-w-2xl mx-auto">
             Your ultimate crypto casino and cat farming experience
           </p>
           
@@ -119,7 +119,7 @@ export default function Homepage() {
             <Card className="crypto-gray border-crypto-pink/20 backdrop-blur-sm bg-opacity-95 animate-glow hover-scale">
               <CardContent className="p-6 text-center">
                 <Wallet className="w-8 h-8 text-crypto-green mx-auto mb-2" />
-                <div className="text-2xl font-bold crypto-green">
+                <div className="text-2xl font-mono font-bold crypto-green">
                   {parseFloat(user.balance).toFixed(2)}
                 </div>
                 <div className="text-sm text-gray-400">Coins Balance</div>
@@ -129,7 +129,7 @@ export default function Homepage() {
             <Card className="crypto-gray border-crypto-pink/20 backdrop-blur-sm bg-opacity-95 animate-glow hover-scale">
               <CardContent className="p-6 text-center">
                 <Cat className="w-8 h-8 text-crypto-pink mx-auto mb-2" />
-                <div className="text-2xl font-bold text-crypto-pink">
+                <div className="text-2xl font-mono font-bold text-crypto-pink">
                   {parseFloat(user.meowBalance).toFixed(4)}
                 </div>
                 <div className="text-sm text-gray-400">$MEOW Tokens</div>
@@ -152,7 +152,7 @@ export default function Homepage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
           <Card className="crypto-gray border-crypto-pink/20 backdrop-blur-sm bg-opacity-95 animate-glow hover-scale transition-all hover:scale-105 flex flex-col h-full">
             <CardHeader>
-              <CardTitle className="text-xl font-bold text-crypto-pink flex items-center">
+              <CardTitle className="text-xl font-heading font-bold text-crypto-pink flex items-center">
                 <Gamepad2 className="w-6 h-6 mr-2" />
                 Casino Games
               </CardTitle>
@@ -172,7 +172,7 @@ export default function Homepage() {
 
           <Card className="crypto-gray border-crypto-pink/20 backdrop-blur-sm bg-opacity-95 animate-glow hover-scale transition-all hover:scale-105 flex flex-col h-full">
             <CardHeader>
-              <CardTitle className="text-xl font-bold text-crypto-pink flex items-center">
+              <CardTitle className="text-xl font-heading font-bold text-crypto-pink flex items-center">
                 <Cat className="w-6 h-6 mr-2" />
                 Cat Farm
               </CardTitle>
@@ -192,7 +192,7 @@ export default function Homepage() {
 
           <Card className="crypto-gray border-crypto-pink/20 backdrop-blur-sm bg-opacity-95 animate-glow hover-scale transition-all hover:scale-105 flex flex-col h-full">
             <CardHeader>
-              <CardTitle className="text-xl font-bold text-crypto-pink flex items-center">
+              <CardTitle className="text-xl font-heading font-bold text-crypto-pink flex items-center">
                 <Wallet className="w-6 h-6 mr-2" />
                 Wallet
               </CardTitle>
@@ -213,31 +213,31 @@ export default function Homepage() {
 
         {/* Features Section */}
         <div className="mb-12">
-          <h2 className="text-3xl font-bold text-center mb-8 text-crypto-pink">
+          <h2 className="text-3xl font-heading font-bold text-center mb-8 text-crypto-pink text-balance">
             Why Choose CryptoMeow?
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="text-center animate-fade-in">
               <Shield className="w-12 h-12 text-crypto-green mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Provably Fair</h3>
+              <h3 className="text-lg font-heading font-semibold mb-2">Provably Fair</h3>
               <p className="text-gray-400 text-sm">All games use cryptographic algorithms to ensure fairness</p>
             </div>
             
             <div className="text-center animate-fade-in" style={{ animationDelay: "0.1s" }}>
               <Zap className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Instant Payouts</h3>
+              <h3 className="text-lg font-heading font-semibold mb-2">Instant Payouts</h3>
               <p className="text-gray-400 text-sm">Fast and secure transactions with instant winnings</p>
             </div>
             
             <div className="text-center animate-fade-in" style={{ animationDelay: "0.2s" }}>
               <Trophy className="w-12 h-12 text-crypto-pink mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Progressive Jackpots</h3>
+              <h3 className="text-lg font-heading font-semibold mb-2">Progressive Jackpots</h3>
               <p className="text-gray-400 text-sm">Every game has a chance to trigger massive jackpot wins</p>
             </div>
             
             <div className="text-center animate-fade-in" style={{ animationDelay: "0.3s" }}>
               <Users className="w-12 h-12 text-blue-500 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Community</h3>
+              <h3 className="text-lg font-heading font-semibold mb-2">Community</h3>
               <p className="text-gray-400 text-sm">Join a thriving community of crypto gaming enthusiasts</p>
             </div>
           </div>
@@ -246,7 +246,7 @@ export default function Homepage() {
         {/* Recent Activity / News Section */}
         <Card className="crypto-gray border-crypto-pink/20 backdrop-blur-sm bg-opacity-95 animate-glow">
           <CardHeader>
-            <CardTitle className="text-xl font-bold text-crypto-pink flex items-center">
+            <CardTitle className="text-xl font-heading font-bold text-crypto-pink flex items-center">
               <TrendingUp className="w-6 h-6 mr-2" />
               Latest Updates
             </CardTitle>
