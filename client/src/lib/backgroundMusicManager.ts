@@ -4,36 +4,93 @@ export class BackgroundMusicManager {
   private enabled: boolean = true;
   private volume: number = 0.5;
   private isInitialized: boolean = false;
+  private currentTrackIndex: number = 0;
+  private availableTracks: string[] = [];
+  private currentTrackName: string = '';
 
   constructor() {
     this.initializeAudio();
   }
 
-  private initializeAudio() {
+  private async detectAvailableTracks(): Promise<string[]> {
+    const tracks: string[] = [];
+    
+    // Check for bgm.mp3
+    try {
+      const response = await fetch('/sounds/bgm.mp3');
+      if (response.ok) {
+        tracks.push('bgm.mp3');
+      }
+    } catch (error) {
+      console.log('bgm.mp3 not found');
+    }
+
+    // Check for numbered tracks (bgm1.mp3, bgm2.mp3, etc.)
+    for (let i = 1; i <= 10; i++) {
+      try {
+        const response = await fetch(`/sounds/bgm${i}.mp3`);
+        if (response.ok) {
+          tracks.push(`bgm${i}.mp3`);
+        }
+      } catch (error) {
+        // Track doesn't exist, continue checking
+      }
+    }
+
+    return tracks;
+  }
+
+  private async initializeAudio() {
     if (this.isInitialized) return;
     
     try {
+      // Detect available tracks first
+      this.availableTracks = await this.detectAvailableTracks();
+      
+      if (this.availableTracks.length === 0) {
+        console.warn('No background music tracks found');
+        return;
+      }
+
       this.audio = new Audio();
-      this.audio.src = "/sounds/bgm.mp3";
-      this.audio.loop = true;
+      this.loadCurrentTrack();
       this.audio.volume = this.volume;
       this.audio.preload = 'auto';
-      this.isInitialized = true;
+      
+      // Handle track ending - play next track
+      this.audio.addEventListener('ended', () => {
+        this.playNextTrack();
+      });
       
       // Handle audio loading errors
       this.audio.addEventListener('error', (e) => {
         console.warn('Background music failed to load:', e);
+        this.playNextTrack(); // Try next track on error
       });
       
-      // Prevent the audio from stopping due to browser policies
-      this.audio.addEventListener('ended', () => {
-        if (this.enabled) {
-          this.play();
-        }
-      });
-      
+      this.isInitialized = true;
     } catch (error) {
       console.warn('Failed to initialize background music:', error);
+    }
+  }
+
+  private loadCurrentTrack() {
+    if (!this.audio || this.availableTracks.length === 0) return;
+
+    const trackName = this.availableTracks[this.currentTrackIndex];
+    this.audio.src = `/sounds/${trackName}`;
+    this.currentTrackName = trackName;
+  }
+
+  private playNextTrack() {
+    if (this.availableTracks.length === 0) return;
+
+    // Move to next track, loop back to first if at end
+    this.currentTrackIndex = (this.currentTrackIndex + 1) % this.availableTracks.length;
+    this.loadCurrentTrack();
+    
+    if (this.enabled) {
+      this.play();
     }
   }
 
@@ -41,12 +98,13 @@ export class BackgroundMusicManager {
     if (!this.audio || !this.enabled) return;
     
     try {
-      // Reset to beginning if needed, but don't interrupt ongoing playback
       if (this.audio.paused) {
         await this.audio.play();
       }
     } catch (error) {
       console.warn('Failed to play background music:', error);
+      // Try next track if current fails
+      this.playNextTrack();
     }
   }
 
@@ -82,6 +140,14 @@ export class BackgroundMusicManager {
 
   isPlaying(): boolean {
     return this.audio ? !this.audio.paused : false;
+  }
+
+  getCurrentTrackName(): string {
+    return this.currentTrackName;
+  }
+
+  getAvailableTracksCount(): number {
+    return this.availableTracks.length;
   }
 }
 

@@ -214,7 +214,8 @@ export class MemStorage implements IStorage {
     if (parseFloat(game.winAmount || "0") === 0) {
       const currentJackpot = parseFloat(this.jackpotData.amount);
       const betAmount = parseFloat(game.betAmount);
-      const jackpotIncrease = betAmount * 0.01; // 1% of losses go to jackpot
+      // 0.1 MEOW per 1000 coins bet = 0.0001 MEOW per coin
+      const jackpotIncrease = betAmount * 0.0001;
       this.jackpotData.amount = (currentJackpot + jackpotIncrease).toFixed(8);
       this.jackpotData.updatedAt = new Date();
     }

@@ -338,7 +338,8 @@ export class MongoStorage implements IStorage {
         if (jackpot) {
           const currentJackpot = parseFloat(jackpot.amount);
           const betAmount = parseFloat(game.betAmount);
-          const jackpotIncrease = betAmount * 0.01;
+          // 0.1 MEOW per 1000 coins bet = 0.0001 MEOW per coin
+          const jackpotIncrease = betAmount * 0.0001;
           jackpot.amount = (currentJackpot + jackpotIncrease).toFixed(8);
           jackpot.updatedAt = new Date();
           await jackpot.save();

@@ -455,7 +455,7 @@ export default function Layout({ children }: LayoutProps) {
                     >
                       <Music className="w-4 h-4" />
                     </Button>
-                    
+
                     {showVolumeSlider && (
                       <div className="absolute top-full right-0 mt-2 p-4 crypto-gray border border-crypto-pink/20 rounded-lg shadow-lg z-50 min-w-[200px]">
                         <div className="space-y-3">
@@ -475,6 +475,13 @@ export default function Layout({ children }: LayoutProps) {
                             </Button>
                           </div>
                           <div className="space-y-2">
+                            {/* Current Track Display */}
+                          <div className="space-y-2">
+                            <div className="text-xs text-gray-400">Now Playing</div>
+                            <div className="text-xs text-gray-300">
+                              {backgroundMusicManager.getCurrentTrackName() || 'No track'}
+                            </div>
+                          </div>
                             <div className="flex items-center justify-between text-xs text-gray-400">
                               <span>Volume</span>
                               <span>{bgmVolume[0]}%</span>
@@ -503,7 +510,7 @@ export default function Layout({ children }: LayoutProps) {
 
       {/* Main Content */}
       <main className="relative z-20">{children}</main>
-      
+
       {/* Footer - only show when user is logged in */}
       {user && <Footer />}
     </div>
