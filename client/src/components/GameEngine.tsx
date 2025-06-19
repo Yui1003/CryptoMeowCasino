@@ -1,7 +1,7 @@
-
-import { useEffect, useRef } from 'react';
-import Phaser from 'phaser';
-import { FarmScene } from '../scenes/FarmScene';
+import { useEffect, useRef } from "react";
+import Phaser from "phaser";
+import { FarmScene } from "../scenes/FarmScene";
+import { backgroundMusicManager } from "../lib/backgroundMusicManager";
 
 interface GameEngineProps {
   farmData: any;
@@ -9,7 +9,11 @@ interface GameEngineProps {
   onClaimCoins?: () => void;
 }
 
-export default function GameEngine({ farmData, onCatClick, onClaimCoins }: GameEngineProps) {
+export default function GameEngine({
+  farmData,
+  onCatClick,
+  onClaimCoins,
+}: GameEngineProps) {
   const gameRef = useRef<HTMLDivElement>(null);
   const phaserGameRef = useRef<Phaser.Game | null>(null);
 
@@ -21,31 +25,36 @@ export default function GameEngine({ farmData, onCatClick, onClaimCoins }: GameE
       width: 1200,
       height: 800,
       parent: gameRef.current,
-      backgroundColor: '#2c5f41',
+      backgroundColor: "#2c5f41",
       scene: [FarmScene],
       audio: {
-        disableWebAudio: true
+        disableWebAudio: true,
       },
       physics: {
-        default: 'arcade',
+        default: "arcade",
         arcade: {
           gravity: { y: 0 },
-          debug: false
-        }
+          debug: false,
+        },
       },
       scale: {
         mode: Phaser.Scale.FIT,
-        autoCenter: Phaser.Scale.CENTER_BOTH
-      }
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+      },
     };
 
     phaserGameRef.current = new Phaser.Game(config);
 
+    // Start background music
+    backgroundMusicManager.setEnabled(true);
+
     // Wait for scene to be ready and pass React callbacks
     const setupScene = () => {
-      const scene = phaserGameRef.current?.scene.getScene('FarmScene') as FarmScene;
+      const scene = phaserGameRef.current?.scene.getScene(
+        "FarmScene",
+      ) as FarmScene;
       if (scene) {
-        console.log('Setting up scene with callbacks and farm data');
+        console.log("Setting up scene with callbacks and farm data");
         scene.setCallbacks({ onCatClick, onClaimCoins });
         if (farmData) {
           scene.updateFarmData(farmData);
@@ -59,10 +68,12 @@ export default function GameEngine({ farmData, onCatClick, onClaimCoins }: GameE
     }, 100);
 
     // Also listen for scene ready event as backup
-    phaserGameRef.current.scene.getScene('FarmScene')?.scene.events.once('create', () => {
-      console.log('Scene create event fired');
-      setTimeout(setupScene, 50);
-    });
+    phaserGameRef.current.scene
+      .getScene("FarmScene")
+      ?.scene.events.once("create", () => {
+        console.log("Scene create event fired");
+        setTimeout(setupScene, 50);
+      });
 
     return () => {
       if (phaserGameRef.current) {
@@ -74,7 +85,9 @@ export default function GameEngine({ farmData, onCatClick, onClaimCoins }: GameE
 
   useEffect(() => {
     if (phaserGameRef.current) {
-      const scene = phaserGameRef.current.scene.getScene('FarmScene') as FarmScene;
+      const scene = phaserGameRef.current.scene.getScene(
+        "FarmScene",
+      ) as FarmScene;
       if (scene) {
         scene.updateFarmData(farmData);
       }
@@ -82,10 +95,10 @@ export default function GameEngine({ farmData, onCatClick, onClaimCoins }: GameE
   }, [farmData]);
 
   return (
-    <div 
-      ref={gameRef} 
+    <div
+      ref={gameRef}
       className="w-full h-full rounded-lg overflow-hidden border-2 border-crypto-pink/30"
-      style={{ minHeight: '600px' }}
+      style={{ minHeight: "600px" }}
     />
   );
 }

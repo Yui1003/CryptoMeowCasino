@@ -58,6 +58,7 @@ class BackgroundMusicManager {
       this.loadCurrentTrack();
       this.audio.volume = this.volume;
       this.audio.preload = 'auto';
+      this.audio.loop = false; // We handle looping manually to cycle between tracks
       
       // Handle track ending - play next track
       this.audio.addEventListener('ended', () => {
@@ -153,7 +154,10 @@ class BackgroundMusicManager {
     this.enabled = enabled;
     if (enabled) {
       console.log('Background music enabled');
-      this.play();
+      // Start playing immediately when enabled
+      if (this.audio && this.audio.paused) {
+        this.play();
+      }
     } else {
       console.log('Background music disabled');
       this.pause();

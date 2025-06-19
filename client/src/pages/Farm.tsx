@@ -233,7 +233,7 @@ export default function Farm() {
     },
   });
 
-  
+
 
   const getRarityColor = (rarity: string) => {
     switch (rarity) {
@@ -260,12 +260,12 @@ export default function Farm() {
 
   const handleCatClick = (catData: any) => {
     console.log('Setting selected cat:', catData);
-    
+
     // Find the corresponding farm cat data to get the correct ID and details
     const farmCat = farmData?.cats?.find((cat: any) => 
       cat.catId === catData.catId && cat.level === catData.level
     );
-    
+
     if (farmCat) {
       // Merge the cat type data with farm cat data to ensure we have all needed fields
       const catType = CAT_TYPES.find((c) => c.id === catData.catId);
@@ -322,74 +322,9 @@ export default function Farm() {
                       />
                     )}
 
-                    {/* Floating HUD */}
-                    <div className="absolute top-4 left-4 right-4 z-10">
-                      <div className="flex justify-between items-start">
-                        {/* Stats Cards */}
-                        <div className="flex gap-2">
-                          <Card className="crypto-gray border-crypto-pink/20 backdrop-blur-sm bg-opacity-90">
-                            <CardContent className="p-3">
-                              <div className="flex items-center gap-2">
-                                <Coins className="w-4 h-4 crypto-gold" />
-                                <div>
-                                  <div className="text-xs text-gray-400">Balance</div>
-                                  <div className="text-sm font-bold text-crypto-pink">
-                                    {parseFloat(user.meowBalance || "0").toFixed(4)}
-                                  </div>
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-
-                          <Card className="crypto-gray border-crypto-pink/20 backdrop-blur-sm bg-opacity-90">
-                            <CardContent className="p-3">
-                              <div className="flex items-center gap-2">
-                                <TrendingUp className="w-4 h-4 crypto-green" />
-                                <div>
-                                  <div className="text-xs text-gray-400">Production</div>
-                                  <div className="text-sm font-bold crypto-green">
-                                    {farmData ? `${parseFloat(farmData.totalProduction || "0").toFixed(4)}/h` : "0/h"}
-                                  </div>
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-
-                          <Card className="crypto-gray border-crypto-pink/20 backdrop-blur-sm bg-opacity-90">
-                            <CardContent className="p-3">
-                              <div className="flex items-center gap-2">
-                                <Zap className="w-4 h-4 crypto-gold" />
-                                <div>
-                                  <div className="text-xs text-gray-400">Unclaimed</div>
-                                  <div className="text-sm font-bold crypto-green">
-                                    {unclaimedMeow.toFixed(4)}
-                                  </div>
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        </div>
-
-                        {/* Action Buttons */}
-                        <div className="flex gap-2">
-                          <Button
-                            onClick={() => claimMutation.mutate()}
-                            disabled={claimMutation.isPending || unclaimedMeow <= 0}
-                            className={`transition-all duration-300 ${
-                              unclaimedMeow > 0
-                                ? 'bg-crypto-green hover:bg-green-500 text-white'
-                                : 'bg-gray-600 text-gray-400'
-                            }`}
-                            size="sm"
-                          >
-                            <Zap className="w-4 h-4 mr-1" />
-                            Claim
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-
                     
+
+
                   </CardContent>
                 </Card>
               </div>
