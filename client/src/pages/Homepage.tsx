@@ -150,19 +150,19 @@ export default function Homepage() {
 
         {/* Main Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-          <Card className="crypto-gray border-crypto-pink/20 backdrop-blur-sm bg-opacity-95 animate-glow hover-scale transition-all hover:scale-105">
+          <Card className="crypto-gray border-crypto-pink/20 backdrop-blur-sm bg-opacity-95 animate-glow hover-scale transition-all hover:scale-105 flex flex-col h-full">
             <CardHeader>
               <CardTitle className="text-xl font-bold text-crypto-pink flex items-center">
                 <Gamepad2 className="w-6 h-6 mr-2" />
                 Casino Games
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <p className="text-gray-300 mb-4">
+            <CardContent className="flex flex-col flex-grow">
+              <p className="text-gray-300 mb-4 flex-grow">
                 Play our exciting casino games including Mines, Crash, Slots, Hi-Lo, and Dice. 
                 Every game offers a chance to win the progressive jackpot!
               </p>
-              <Button asChild className="w-full crypto-pink hover:bg-crypto-pink-light">
+              <Button asChild className="w-full crypto-pink hover:bg-crypto-pink-light mt-auto">
                 <Link href="/casino">
                   Start Playing
                 </Link>
@@ -170,19 +170,19 @@ export default function Homepage() {
             </CardContent>
           </Card>
 
-          <Card className="crypto-gray border-crypto-pink/20 backdrop-blur-sm bg-opacity-95 animate-glow hover-scale transition-all hover:scale-105">
+          <Card className="crypto-gray border-crypto-pink/20 backdrop-blur-sm bg-opacity-95 animate-glow hover-scale transition-all hover:scale-105 flex flex-col h-full">
             <CardHeader>
               <CardTitle className="text-xl font-bold text-crypto-pink flex items-center">
                 <Cat className="w-6 h-6 mr-2" />
                 Cat Farm
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <p className="text-gray-300 mb-4">
+            <CardContent className="flex flex-col flex-grow">
+              <p className="text-gray-300 mb-4 flex-grow">
                 Collect and breed adorable cats that generate $MEOW tokens passively. 
                 Build your cat empire and watch your earnings grow!
               </p>
-              <Button asChild className="w-full crypto-pink hover:bg-crypto-pink-light">
+              <Button asChild className="w-full crypto-pink hover:bg-crypto-pink-light mt-auto">
                 <Link href="/farm">
                   Visit Farm
                 </Link>
@@ -190,19 +190,19 @@ export default function Homepage() {
             </CardContent>
           </Card>
 
-          <Card className="crypto-gray border-crypto-pink/20 backdrop-blur-sm bg-opacity-95 animate-glow hover-scale transition-all hover:scale-105">
+          <Card className="crypto-gray border-crypto-pink/20 backdrop-blur-sm bg-opacity-95 animate-glow hover-scale transition-all hover:scale-105 flex flex-col h-full">
             <CardHeader>
               <CardTitle className="text-xl font-bold text-crypto-pink flex items-center">
                 <Wallet className="w-6 h-6 mr-2" />
                 Wallet
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <p className="text-gray-300 mb-4">
+            <CardContent className="flex flex-col flex-grow">
+              <p className="text-gray-300 mb-4 flex-grow">
                 Manage your funds, deposit money, withdraw winnings, and convert between 
                 coins and $MEOW tokens seamlessly.
               </p>
-              <Button asChild className="w-full crypto-pink hover:bg-crypto-pink-light">
+              <Button asChild className="w-full crypto-pink hover:bg-crypto-pink-light mt-auto">
                 <Link href="/wallet">
                   Manage Wallet
                 </Link>
