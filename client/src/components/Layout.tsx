@@ -10,6 +10,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import JackpotBanner from "./JackpotBanner";
+import Footer from "./Footer";
 import { 
   User, 
   LogOut, 
@@ -236,11 +237,17 @@ export default function Layout({ children }: LayoutProps) {
             {user && (
               <div className="hidden md:flex items-center space-x-6">
                 <Link href="/" className="text-gray-300 hover:text-white transition-colors">
+                  Home
+                </Link>
+                <Link href="/casino" className="text-gray-300 hover:text-white transition-colors">
                   Casino
                 </Link>
                 <Link href="/farm" className="text-gray-300 hover:text-white transition-colors flex items-center space-x-1">
                   <span>🐱</span>
                   <span>Cat Farm</span>
+                </Link>
+                <Link href="/about" className="text-gray-300 hover:text-white transition-colors">
+                  About
                 </Link>
 
                 {/* Games Dropdown */}
@@ -299,6 +306,12 @@ export default function Layout({ children }: LayoutProps) {
                     <DropdownMenuContent className="crypto-gray border-crypto-pink/20">
                       <DropdownMenuItem asChild>
                         <Link href="/" className="flex items-center space-x-2">
+                          <span>🏠</span>
+                          <span>Home</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/casino" className="flex items-center space-x-2">
                           <span>🎰</span>
                           <span>Casino</span>
                         </Link>
@@ -307,6 +320,12 @@ export default function Layout({ children }: LayoutProps) {
                         <Link href="/farm" className="flex items-center space-x-2">
                           <span>🐱</span>
                           <span>Cat Farm</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/about" className="flex items-center space-x-2">
+                          <span>ℹ️</span>
+                          <span>About</span>
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
@@ -484,6 +503,9 @@ export default function Layout({ children }: LayoutProps) {
 
       {/* Main Content */}
       <main className="relative z-20">{children}</main>
+      
+      {/* Footer - only show when user is logged in */}
+      {user && <Footer />}
     </div>
   );
 }

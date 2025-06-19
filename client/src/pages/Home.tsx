@@ -266,7 +266,7 @@ export default function Home() {
                     asChild
                     className="w-full crypto-pink hover:bg-crypto-pink-light transition-all hover:scale-105 hover:shadow-lg hover:shadow-crypto-pink/30"
                   >
-                    <Link href="/">
+                    <Link href="/casino">
                       <Gamepad2 className="w-4 h-4 mr-2" />
                       Games
                     </Link>
