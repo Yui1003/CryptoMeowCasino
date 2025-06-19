@@ -97,8 +97,7 @@ export default function GameEngine({
   return (
     <div
       ref={gameRef}
-      className="w-full h-full rounded-lg overflow-hidden border-2 border-crypto-pink/30"
-      style={{ minHeight: "600px" }}
+      className="w-full h-full overflow-hidden"
     />
   );
 }

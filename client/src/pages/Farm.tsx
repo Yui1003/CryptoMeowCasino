@@ -294,45 +294,112 @@ export default function Farm() {
         </Badge>
       </div>
 
+      {/* Mobile-first: Show farm stats at top on mobile */}
+      <div className="block lg:hidden mb-6">
+        <Card className="crypto-gray">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg flex items-center">
+              <Coins className="w-5 h-5 crypto-gold mr-2" />
+              Farm Stats
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 gap-4 text-center">
+            <div>
+              <div className="text-sm text-gray-400">Your $MEOW Balance</div>
+              <div className="text-lg font-bold text-crypto-pink">
+                {parseFloat(user.meowBalance || "0").toFixed(6)}
+              </div>
+            </div>
+
+            <div>
+              <div className="text-sm text-gray-400">Unclaimed Rewards</div>
+              <div className="text-md font-semibold crypto-green">
+                {unclaimedMeow.toFixed(6)}
+              </div>
+            </div>
+
+            <div>
+              <div className="text-sm text-gray-400">Production Rate</div>
+              <div className="text-md font-semibold bg-pink-500 text-black py-1 px-2 rounded-md">
+                {farmData
+                  ? `${parseFloat(farmData.totalProduction || "0").toFixed(6)}/hour`
+                  : "0.000000/hour"}
+              </div>
+            </div>
+
+            <div className="flex items-center">
+              <Button
+                onClick={() => claimMutation.mutate()}
+                disabled={
+                  claimMutation.isPending ||
+                  unclaimedMeow <= 0
+                }
+                className="w-full bg-crypto-green hover:bg-green-500 text-white hover:text-black font-semibold text-sm py-2"
+              >
+                <Zap className="w-3 h-3 mr-1" />
+                Claim
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Main Content - Show first on mobile, second on desktop */}
+        {/* Main Content */}
         <div className="lg:col-span-3 order-1 lg:order-2">
           <Tabs defaultValue="game" className="space-y-6">
-            <TabsList className="crypto-gray border-crypto-pink/20">
-              <TabsTrigger value="game" className="flex items-center gap-2">
-                <Gamepad2 className="w-4 h-4" />
-                Cat Village
+            <TabsList className="crypto-gray w-full">
+              <TabsTrigger value="game" className="flex items-center gap-1 sm:gap-2 flex-1 text-xs sm:text-sm">
+                <Gamepad2 className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">Cat Village</span>
+                <span className="sm:hidden">Village</span>
               </TabsTrigger>
-              <TabsTrigger value="cats" className="flex items-center gap-2">
-                <BarChart3 className="w-4 h-4" />
-                My Cats
+              <TabsTrigger value="cats" className="flex items-center gap-1 sm:gap-2 flex-1 text-xs sm:text-sm">
+                <BarChart3 className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">My Cats</span>
+                <span className="sm:hidden">Cats</span>
               </TabsTrigger>
-              <TabsTrigger value="shop">Cat Shop</TabsTrigger>
+              <TabsTrigger value="shop" className="flex-1 text-xs sm:text-sm">
+                <span className="hidden sm:inline">Cat Shop</span>
+                <span className="sm:hidden">Shop</span>
+              </TabsTrigger>
             </TabsList>
 
             {/* Game View Tab */}
             <TabsContent value="game">
               <div className="relative">
-                <Card className="crypto-gray border-crypto-pink/20 overflow-hidden">
-                  <CardContent className="p-0 relative">
-                    {farmData && (
-                      <GameEngine
-                        farmData={farmData}
-                        onCatClick={handleCatClick}
-                      />
-                    )}
+                <div className="w-full h-[60vh] sm:h-[65vh] lg:h-[70vh] overflow-hidden rounded-lg">
+                  {farmData && (
+                    <GameEngine
+                      farmData={farmData}
+                      onCatClick={handleCatClick}
+                    />
+                  )}
+                </div>
 
-                    
-
-
-                  </CardContent>
-                </Card>
+                {/* Mobile How to Play - Show below game on mobile */}
+                <div className="block lg:hidden mt-4">
+                  <Card className="crypto-gray">
+                    <CardContent className="p-3">
+                      <div className="text-center">
+                        <p className="text-sm text-gray-300 mb-2">
+                          🎮 <strong>How to Play:</strong> Buy cats from the shop • Click cats to view details and upgrade them • Cats automatically earn $MEOW over time • Higher level cats produce more!
+                        </p>
+                        <div className="flex justify-center gap-2 text-xs text-gray-400 flex-wrap">
+                          <span>⬆️ Upgrade = +Production</span>
+                          <span>💰 Claim = Collect earnings</span>
+                          <span>🛒 Shop = Buy new cats</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
             </TabsContent>
 
             {/* My Cats Tab */}
             <TabsContent value="cats">
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4">
                 {farmData?.cats?.length > 0 ? (
                   farmData.cats.map((farmCat: any, index: number) => {
                     const catType = CAT_TYPES.find(
@@ -343,7 +410,7 @@ export default function Farm() {
                     return (
                       <Card
                         key={index}
-                        className="crypto-gray border-crypto-pink/20"
+                        className="crypto-gray"
                       >
                         <CardHeader className="pb-2">
                           <CardTitle className="flex items-center justify-between">
@@ -413,11 +480,11 @@ export default function Farm() {
 
             {/* Cat Shop Tab */}
             <TabsContent value="shop">
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4">
                 {CAT_TYPES.map((cat) => (
                   <Card
                     key={cat.id}
-                    className="crypto-gray border-crypto-pink/20"
+                    className="crypto-gray"
                   >
                     <CardHeader className="pb-2">
                       <CardTitle className="flex items-center justify-between">
@@ -468,9 +535,9 @@ export default function Farm() {
           </Tabs>
         </div>
 
-        {/* Farm Stats - Show second on mobile, first on desktop */}
-        <div className="lg:col-span-1 space-y-4 order-2 lg:order-1">
-          <Card className="crypto-gray border-crypto-pink/20">
+        {/* Farm Stats - Hide on mobile, show on desktop */}
+        <div className="hidden lg:block lg:col-span-1 space-y-4 order-2 lg:order-1">
+          <Card className="crypto-gray">
             <CardHeader className="pb-2">
               <CardTitle className="text-lg flex items-center">
                 <Coins className="w-5 h-5 crypto-gold mr-2" />
@@ -516,7 +583,7 @@ export default function Farm() {
           </Card>
 
           {/* How to Play Instructions */}
-          <Card className="crypto-gray border-crypto-pink/20">
+          <Card className="crypto-gray">
             <CardContent className="p-3">
               <div className="text-center">
                 <p className="text-sm text-gray-300 mb-2">
@@ -535,7 +602,7 @@ export default function Farm() {
 
       {/* Cat Information Dialog */}
       <Dialog open={showCatDialog} onOpenChange={setShowCatDialog}>
-        <DialogContent className="crypto-gray border-crypto-pink/20 max-w-md">
+        <DialogContent className="crypto-gray max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-xl">
               <span className="text-2xl">
